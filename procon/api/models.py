@@ -5,6 +5,10 @@ from django.contrib.auth.models import User
 # Create your models here.
 
 
+class ProgramLanguage(models.Model):
+    name = models.CharField(max_length=16)
+
+
 class Timezone(models.Model):
     zone = models.CharField(max_length=16)
     location = models.CharField(max_length=16)
@@ -17,7 +21,9 @@ class UserProfile(models.Model):
     timezone = models.ForeignKey(
         Timezone, on_delete=models.CASCADE, blank=False, null=True
     )
-    preferred_language = models.CharField(max_length=10)
+    preferred_language = models.ForeignKey(
+        ProgramLanguage, on_delete=models.DO_NOTHING, blank=False, null=True
+    )
     last_access_time = models.TimeField()
     last_ip = models.BinaryField()
 
@@ -71,7 +77,9 @@ class Submission(models.Model):
     problem = models.ForeignKey(
         Problem, on_delete=models.CASCADE, blank=False, null=False
     )
-    language = models.CharField(max_length=10)
+    language = models.ForeignKey(
+        ProgramLanguage, on_delete=models.DO_NOTHING, blank=False, null=True
+    )
     code = models.CharField(max_length=65536)
     status = models.CharField(
         max_length=3, choices=SubmissionStatus.choices, default="AB"
