@@ -5,11 +5,18 @@ from django.contrib.auth.models import User
 # Create your models here.
 
 
+class Timezone(models.Model):
+    zone = models.CharField(max_length=16)
+    location = models.CharField(max_length=16)
+    offset = models.IntegerField()
+    offset_dst = models.ImageField()
+
+
 class UserProfile(models.Model):
-    user = models.OneToOneField(
-        User, on_delete=models.CASCADE, blank=False, null=False
+    user = models.OneToOneField(User, on_delete=models.CASCADE, blank=False, null=False)
+    timezone = models.ForeignKey(
+        Timezone, on_delete=models.CASCADE, blank=False, null=True
     )
-    location = models.CharField(max_length=32)
     preferred_language = models.CharField(max_length=10)
     last_access_time = models.TimeField()
     last_ip = models.BinaryField()
