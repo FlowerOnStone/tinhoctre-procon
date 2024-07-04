@@ -1,13 +1,27 @@
 import Header from '@/components/header';
 import Image from 'next/image';
-
-export default function Home() {
+import {ScoreBoard} from '@/components/scoreboard/scoreboard';
+import { Payment, columns } from '@/components/scoreboard/column';
+import { DataTable } from '@/components/scoreboard/data-table';
+import StatusBar from '@/components/statusBar/StatusBar'
+ 
+async function getData(): Promise<Payment[]> {
+  // Fetch data from your API here.
+  return [
+    {
+      id: "728ed52f",
+      amount: 100,
+      status: "pending",
+      email: "m@example.com",
+    },
+    // ...
+  ]
+}
+export default async function Home() {
+  const data = await getData()
   return (
-    <>
-      <Header isFixed={false} />
-      <main className="flex flex-col items-center justify-between p-16">
-        <Image src="/banner_header.jpg" alt="logo" width={2560} height={1016} />
-      </main>
-    </>
+    <div>
+      <StatusBar/>
+    </div>
   );
 }
