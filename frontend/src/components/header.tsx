@@ -2,11 +2,10 @@
 
 import Link from 'next/link';
 import React from 'react';
-import Image from 'next/image';
 
 const routes = [
   { name: 'Logo', href: '/' },
-  { name: 'Thi đấu', href: '/matches' },
+  { name: 'Thi đấu', href: '/battle' },
   { name: 'Cuộc thi', href: '/competitions' },
   { name: 'Thư viện', href: '/library' },
 ];
