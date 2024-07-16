@@ -5,16 +5,38 @@ from django.contrib.auth.hashers import make_password
 from django.utils.text import slugify
 
 
-class TimezoneSerializer(serializers.Serializer):
+class ProgramLanguageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ProgramLanguage
+        fields = ("id", "name")
+
+
+class ProgramLanguageInfoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ProgramLanguage
+        fields = ("id", "name", "compile_args")
+
+
+class TimezoneSerializer(serializers.ModelSerializer):
     class Meta:
         model = Timezone
-        fields = ["id", "zone", "location", "offset", "offset_dst"]
+        fields = ("id", "zone", "location", "offset", "offset_dst")
 
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ("id", "username", "first_name", "email")
+        fields = ("id", "username", "first_name")
+
+
+class ChangePasswordSerializer(serializers.Serializer):
+    model = User
+
+    """
+    Serializer for password change endpoint.
+    """
+    old_password = serializers.CharField(required=True)
+    new_password = serializers.CharField(required=True)
 
 
 class LoginUserSerializer(serializers.Serializer):
@@ -50,3 +72,83 @@ class CreateUserSerializer(serializers.ModelSerializer):
         user.last_name = validated_data["last_name"]
         user.save()
         return user
+
+
+class ChangeUserInfoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ("id", "first_name", "last_name")
+
+
+class ListProblemSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Problem
+        fields = (
+            "id",
+            "slug",
+            "name",
+            "public_visible",
+        )
+
+
+class ProblemSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Problem
+        fields = (
+            "id",
+            "slug",
+            "name",
+            "public_visible",
+            "creator",
+            "body",
+            "pdf",
+            "time_limit",
+            "memory_limit",
+            "allow_language",
+        )
+
+    def create(self, validated_data):
+        return super().create(validated_data)
+
+    def update(self, instance, validated_data):
+        return super().update(instance, validated_data)
+
+
+class ListSubmissionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Submission
+        fields = (
+            "user",
+            "problem",
+            "language",
+            "status",
+            "total_point",
+            "time",
+            "memory",
+        )
+
+
+class CreateSubmissionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Submission
+        fields = (
+            "user",
+            "problem",
+            "language",
+            "code",
+        )
+
+
+class SubmissionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Submission
+        fields = (
+            "user",
+            "problem",
+            "language",
+            "code",
+            "status",
+            "total_point",
+            "time",
+            "memory",
+        )
