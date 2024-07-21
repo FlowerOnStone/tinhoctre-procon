@@ -1,5 +1,3 @@
-"use client"
-
 import React from 'react'
 import TestCaseForm from './testcaseform'
 import { DataTable } from '../table/generaltable'

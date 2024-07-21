@@ -1,5 +1,5 @@
 "use client"
-import React from 'react';
+import React, {useState} from 'react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -14,9 +14,38 @@ import { ColumnDef } from "@tanstack/react-table";
 import { ArrowUpDown } from "lucide-react";
 import { DotsHorizontalIcon } from "@radix-ui/react-icons";
 
+
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogClose,
+  DialogFooter
+} from "@/components/ui/dialog"
+
+
+
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
+import TestCaseForm from './testcaseform';
+import TestCaseEditor from './testcaseeditor';
+
+
 export type TestCase = {
   id: string;
-  zipFile?: string;
+  zipFile?: File;
   grader: string;
   ioMethod: string;
   marker: string;
@@ -26,6 +55,7 @@ export type TestCase = {
 const testCaseData: TestCase[] = [
   {
     id: "1",
+    zipFile: undefined,
     grader: "Grader Alpha",
     ioMethod: "Method A",
     marker: "Marker X",
@@ -33,6 +63,7 @@ const testCaseData: TestCase[] = [
   },
   {
     id: "2",
+    zipFile: undefined,
     grader: "Grader Beta",
     ioMethod: "Method B",
     marker: "Marker Y",
@@ -40,6 +71,7 @@ const testCaseData: TestCase[] = [
   },
   {
     id: "3",
+    zipFile: undefined,
     grader: "Grader Gamma",
     ioMethod: "Method C",
     marker: "Marker Z",
@@ -47,6 +79,7 @@ const testCaseData: TestCase[] = [
   },
   {
     id: "4",
+    zipFile: undefined,
     grader: "Grader Delta",
     ioMethod: "Method D",
     marker: "Marker W",
@@ -54,6 +87,7 @@ const testCaseData: TestCase[] = [
   },
   {
     id: "5",
+    zipFile: undefined,
     grader: "Grader Epsilon",
     ioMethod: "Method E",
     marker: "Marker V",
@@ -118,6 +152,14 @@ export const columnsTestCase: ColumnDef<TestCase>[] = [
       enableHiding: false,
       cell: ({ row }) => {
         const testCase = row.original;
+        const [isEditDialogOpen, setIsEditDialogOpen] = useState<boolean>(false);
+        const [isDeleteAlertDialogOpen, setIsDeleteAlertDialogOpen] = useState<boolean>(false);
+
+        const handleDelete = (): void => {
+          console.log('Item deleted');
+          setIsDeleteAlertDialogOpen(false);
+        };
+
 
         return (
           <div className="text-right mr-3">
@@ -136,8 +178,49 @@ export const columnsTestCase: ColumnDef<TestCase>[] = [
                   Copy ID
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem>View Details</DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setIsEditDialogOpen(true)}>Xem và chỉnh sửa</DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setIsDeleteAlertDialogOpen(true)} style = {{color: 'red'}}>Xóa test case</DropdownMenuItem>
               </DropdownMenuContent>
+              
+
+              <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+                <DialogTrigger asChild>
+                  <button style={{ display: 'none' }}></button>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogTitle>Thông tin chi tiết</DialogTitle>
+                  <DialogDescription>
+                    Xem và thiết lập các chỉnh sửa trong test case ở đây. Chọn Lưu để lưu chỉnh sửa
+                  </DialogDescription>
+                    <TestCaseEditor data={testCase}></TestCaseEditor>
+                    <DialogFooter>
+                      <Button onClick={() => setIsEditDialogOpen(false)} style={{backgroundColor: '#2084bc'}}>Lưu</Button>
+                      <Button variant="ghost" onClick={() => setIsEditDialogOpen(false)}>Hủy</Button>
+                    </DialogFooter>
+                </DialogContent>
+              </Dialog>
+
+
+              <AlertDialog open={isDeleteAlertDialogOpen} onOpenChange={setIsDeleteAlertDialogOpen}>
+                <AlertDialogTrigger asChild>
+                  <button style={{ display: 'none' }}></button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogTitle>Xác nhận xóa</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Bạn có chắc chắn muốn xóa test case này không? Hành động này không thể hoàn tác.
+                  </AlertDialogDescription>
+                  <AlertDialogFooter>
+                    <AlertDialogAction style={{backgroundColor:"#d02434"}} onClick={handleDelete}>
+                      Xóa
+                    </AlertDialogAction>
+                    <AlertDialogCancel onClick={() => setIsDeleteAlertDialogOpen(false)}>
+                      Hủy
+                    </AlertDialogCancel>
+                  </AlertDialogFooter>
+                  
+                </AlertDialogContent>
+              </AlertDialog>
             </DropdownMenu>
           </div>
         );
