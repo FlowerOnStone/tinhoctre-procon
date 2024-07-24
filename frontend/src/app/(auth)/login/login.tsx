@@ -37,7 +37,7 @@ export default function Login() {
     <main className="w-full h-screen flex flex-col items-center justify-center px-24">
       <h1 className="text-3xl ">Đăng nhập</h1>
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8 w-1/3 p-16 bg-[#EEEEEE] m-12">
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8 w-1/3 p-12 bg-[#EEEEEE] m-12">
           <FormField
             control={form.control}
             name="username"

@@ -16,6 +16,7 @@ const buttonVariants = cva(
         ghost: 'hover:bg-accent hover:text-accent-foreground',
         link: 'text-primary underline-offset-4 hover:underline',
         login: 'bg-[#1C81BA] text-white hover:bg-[#1A6F9A]',
+        submit: 'bg-[#2ec767] border border-input text-accent-foreground hover:bg-accent/90',
       },
       size: {
         default: 'h-10 px-4 py-2',

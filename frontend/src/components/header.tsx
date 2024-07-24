@@ -6,8 +6,7 @@ import React from 'react';
 const routes = [
   { name: 'Logo', href: '/' },
   { name: 'Thi đấu', href: '/battle' },
-  { name: 'Cuộc thi', href: '/competitions' },
-  { name: 'Thư viện', href: '/library' },
+  { name: 'Cuộc thi', href: '/contest' },
 ];
 
 export default function Header({ isFixed = true }: { isFixed?: boolean }) {

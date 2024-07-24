@@ -8,7 +8,7 @@ const inter = Inter({ subsets: ['latin'] });
 export const metadata: Metadata = {
   title: 'Tin Học Trẻ - Procon',
   description: 'Tin học trẻ - Procon',
-  icons: [{ rel: 'icon', url: '/temple.png' }],
+  icons: [{ rel: 'icon', url: '/idea.png' }],
 };
 
 export default function RootLayout({
