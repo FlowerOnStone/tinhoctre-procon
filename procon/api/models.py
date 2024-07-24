@@ -5,27 +5,50 @@ from django.contrib.auth.models import User
 # Create your models here.
 
 
+class ProgramLanguage(models.Model):
+    def __str__(self) -> str:
+        return self.name
+    name = models.CharField(max_length=16)
+    compile_args = models.CharField(max_length=64)
+
+
+class Timezone(models.Model):
+    def __str__(self) -> str:
+        return self.zone + "/" + self.location
+    zone = models.CharField(max_length=16)
+    location = models.CharField(max_length=32, null=True, blank=True)
+    offset = models.IntegerField()
+    offset_dst = models.IntegerField()
+
+
 class UserProfile(models.Model):
-    user = models.OneToOneField(
-        User, on_delete=models.CASCADE, blank=False, null=False
+    def __str__(self) -> str:
+        return self.user.username
+    user = models.OneToOneField(User, on_delete=models.CASCADE, blank=False, null=False)
+    timezone = models.ForeignKey(
+        Timezone, on_delete=models.CASCADE, blank=False, null=True
     )
-    location = models.CharField(max_length=32)
-    preferred_language = models.CharField(max_length=10)
-    last_access_time = models.TimeField()
-    last_ip = models.BinaryField()
+    preferred_language = models.ForeignKey(
+        ProgramLanguage, on_delete=models.DO_NOTHING, blank=False, null=True
+    )
+    last_access_time = models.TimeField(null=True)
+    last_ip = models.BinaryField(null=True)
 
 
 class Problem(models.Model):
-    slug = models.SlugField()
+    def __str__(self) -> str:
+        return self.name + " (" + self.slug + ")"
+
+    slug = models.SlugField(unique=True)
     name = models.CharField(max_length=128)
     public_visible = models.BooleanField()
     creator = models.ManyToManyField(User)
     body = models.CharField(max_length=65536)
-    pdf = models.FileField()
+    pdf = models.FileField(null=True)
     time_limit = models.IntegerField()
     memory_limit = models.IntegerField()
     allow_language = models.BinaryField()
-    test_data = models.FileField()
+    test_data = models.FileField(null=True, blank=True)
 
 
 class TestCase(models.Model):
@@ -60,18 +83,22 @@ class SubmissionStatus(models.TextChoices):
 
 
 class Submission(models.Model):
+    def __str__(self) -> str:
+        return self.id
     user = models.ForeignKey(User, on_delete=models.CASCADE, blank=False, null=False)
     problem = models.ForeignKey(
         Problem, on_delete=models.CASCADE, blank=False, null=False
     )
-    language = models.CharField(max_length=10)
+    language = models.ForeignKey(
+        ProgramLanguage, on_delete=models.DO_NOTHING, blank=False, null=True
+    )
     code = models.CharField(max_length=65536)
     status = models.CharField(
         max_length=3, choices=SubmissionStatus.choices, default="AB"
     )
-    total_point = models.IntegerField()
-    time = models.IntegerField()
-    memory = models.IntegerField()
+    total_point = models.IntegerField(default=0)
+    time = models.IntegerField(default=0)
+    memory = models.IntegerField(default=0)
 
 
 class TestCaseResult(models.Model):
