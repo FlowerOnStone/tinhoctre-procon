@@ -1,6 +1,8 @@
+"use client"
+
 import React from 'react';
 
-const GameScreen = () => {
+const GameScreen: React.FC = () => {
   return (
     <div>
       GameScreen

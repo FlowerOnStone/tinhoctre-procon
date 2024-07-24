@@ -1,55 +1,59 @@
 "use client"
-import Avatar from '../avatar/Avatar';
-import React, { useState, useEffect } from 'react';
 
-function getWidth(score) {
+import React, { useState, useEffect, useRef } from 'react';
+import Avatar from '../avatar/Avatar';
+
+function getWidth(score: [number, number]): number {
   let percentage = 0.5;
   if ((score[0] + score[1]) !== 0) percentage = (score[0]) / (score[0] + score[1]);
   if (percentage > 0.9 || percentage < 0.1) {
-    if (percentage > 0.9) percentage = 0.9;
-    else percentage = 0.1;
+    percentage = percentage > 0.9 ? 0.9 : 0.1;
   }
-  let width = 100 * percentage;
-  return width;
+  return 100 * percentage;
 }
 
-const StatusBar = () => {
-  const [score, setScore] = useState([0, 0]);
-  const [scoreHistory, setScoreHistory] = useState([]); 
-  const [width, setWidth] = useState(getWidth(score));
-  const [isPlaying, setIsPlaying] = useState(true); 
+const StatusBar: React.FC = () => {
+  const [score, setScore] = useState<[number, number]>([0, 0]);
+  const [scoreHistory, setScoreHistory] = useState<[number, number][]>([]);
+  const [width, setWidth] = useState<number>(getWidth(score));
+  const [isPlaying, setIsPlaying] = useState<boolean>(true);
+  const intervalIdRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     setWidth(getWidth(score));
   }, [score]);
 
   useEffect(() => {
-    let intervalId;
     if (isPlaying) {
-      intervalId = setInterval(() => {
+      intervalIdRef.current = setInterval(() => {
         changeScore();
       }, 1000);
-    } else {
-      clearInterval(intervalId);
+    } else if (intervalIdRef.current) {
+      clearInterval(intervalIdRef.current);
+      intervalIdRef.current = null;
     }
-    return () => clearInterval(intervalId);
+    return () => {
+      if (intervalIdRef.current) {
+        clearInterval(intervalIdRef.current);
+      }
+    };
   }, [isPlaying]);
 
   const changeScore = () => {
-    setScoreHistory([...scoreHistory, score]); 
+    setScoreHistory([...scoreHistory, score]);
     setScore([Math.floor(Math.random() * 100), Math.floor(Math.random() * 100)]);
   };
 
   const revertScore = () => {
     if (scoreHistory.length > 0) {
-      const lastScore = scoreHistory.pop(); 
-      setScore(lastScore); 
-      setScoreHistory(scoreHistory); 
+      const lastScore = scoreHistory.pop()!;
+      setScore(lastScore);
+      setScoreHistory(scoreHistory);
     }
   };
 
   const togglePlayPause = () => {
-    setIsPlaying(!isPlaying); 
+    setIsPlaying(!isPlaying);
   };
 
   return (
@@ -74,15 +78,14 @@ const StatusBar = () => {
         </div>
 
         <div style={{ width: '100%', backgroundColor: '#424243', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', height: '4vh' }}>
-          {/* Buttons to change and revert score */}
           <div style={{ display: 'flex' }}>
-            <button onClick={revertScore} style={{marginRight: '1rem'}}>
+            <button onClick={revertScore} style={{ marginRight: '1rem' }}>
               <p style={{ color: '#ffffff', fontSize: '1.7vh' }}>Revert</p>
             </button>
             <button onClick={togglePlayPause} style={{ marginRight: '1rem' }}>
               <p style={{ color: '#ffffff', fontSize: '1.7vh' }}>{isPlaying ? 'Pause' : 'Play'}</p>
             </button>
-            <button onClick={changeScore} >
+            <button onClick={changeScore}>
               <p style={{ color: '#ffffff', fontSize: '1.7vh' }}>Update</p>
             </button>
           </div>
