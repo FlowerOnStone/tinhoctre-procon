@@ -52,4 +52,35 @@ urlpatterns = [
         RetrieveSubmissionAPI.as_view(),
         name="view_submission",
     ),  # tested
+    path("tournament/", ListCreateTournamentAPI.as_view(), name="create_tournament"),
+    path(
+        "tournament/<int:id>/",
+        RetrieveTournamentAPI.as_view(),
+        name="retrieve_tournament",
+    ),
+    path(
+        "tournament/<int:id>/group/",
+        RetrieveTouramentGroupAPI.as_view(),
+        name="view_tournament_group",
+    ),
+    path(
+        "group/<int:id>/",
+        RetrieveGroupRoundAPI.as_view(),
+        name="view_group_round",
+    ),
+    path(
+        "round/",
+        ListCreateRoundAPI.as_view(),
+        name="list_create_round",
+    ),
+    path(
+        "round/<int:id>/match/",
+        ListCreateMatchAPI.as_view(),
+        name="list_create_match",
+    ),
+    path(
+        "match/<int:id>/",
+        RetrieveMatchAPI.as_view(),
+        name="retrieve_match",
+    ),
 ]
