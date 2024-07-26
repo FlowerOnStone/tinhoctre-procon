@@ -8,6 +8,7 @@ from django.contrib.auth.models import User
 class ProgramLanguage(models.Model):
     def __str__(self) -> str:
         return self.name
+
     name = models.CharField(max_length=16)
     compile_args = models.CharField(max_length=64)
 
@@ -15,6 +16,7 @@ class ProgramLanguage(models.Model):
 class Timezone(models.Model):
     def __str__(self) -> str:
         return self.zone + "/" + self.location
+
     zone = models.CharField(max_length=16)
     location = models.CharField(max_length=32, null=True, blank=True)
     offset = models.IntegerField()
@@ -24,6 +26,7 @@ class Timezone(models.Model):
 class UserProfile(models.Model):
     def __str__(self) -> str:
         return self.user.username
+
     user = models.OneToOneField(User, on_delete=models.CASCADE, blank=False, null=False)
     timezone = models.ForeignKey(
         Timezone, on_delete=models.CASCADE, blank=False, null=True
@@ -80,21 +83,25 @@ class SubmissionStatus(models.TextChoices):
     INTERNAL_ERROR = "IE"
     COMPILE_ERROR = "CE"
     ABORTED = "AB"
+    IN_QUEUE = "QU"
+    PROCESSING = "PR"
 
 
 class Submission(models.Model):
     def __str__(self) -> str:
-        return self.id
+        return str(self.id)
+
     user = models.ForeignKey(User, on_delete=models.CASCADE, blank=False, null=False)
     problem = models.ForeignKey(
         Problem, on_delete=models.CASCADE, blank=False, null=False
     )
+    submission_time = models.DateTimeField(auto_now_add=True)
     language = models.ForeignKey(
         ProgramLanguage, on_delete=models.DO_NOTHING, blank=False, null=True
     )
     code = models.CharField(max_length=65536)
     status = models.CharField(
-        max_length=3, choices=SubmissionStatus.choices, default="AB"
+        max_length=3, choices=SubmissionStatus.choices, default="QU"
     )
     total_point = models.IntegerField(default=0)
     time = models.IntegerField(default=0)
@@ -115,14 +122,31 @@ class TestCaseResult(models.Model):
 
 
 class Tournament(models.Model):
+    def __str__(self) -> str:
+        return str(self.name)
+
+    name = models.CharField(max_length=64)
     creators = models.ManyToManyField(User, related_name="tournament_creators")
-    participant = models.ManyToManyField(User, related_name="tournament_participant")
+    participants = models.ManyToManyField(User, related_name="tournament_participant")
     tournament_table = models.JSONField()
+    num_group = models.IntegerField(default=8)
+    problem = models.ForeignKey(
+        Problem, null=True, blank=True, on_delete=models.CASCADE
+    )
+    start_submission_time = models.DateTimeField()
+    end_submission_time = models.DateTimeField()
+    start_combat_time = models.DateTimeField()
+    end_combat_time = models.DateTimeField()
 
 
 class Group(models.Model):
-    creators = models.ManyToManyField(User, related_name="creators")
+    tournament = models.ForeignKey(
+        Tournament, on_delete=models.SET_NULL, blank=True, null=True
+    )
+    index = models.IntegerField()
     participants = models.ManyToManyField(User, related_name="participants")
+    status = models.IntegerField(default=0)
+    num_match = models.IntegerField(default=0)
 
 
 class Round(models.Model):
@@ -130,21 +154,40 @@ class Round(models.Model):
         Tournament, on_delete=models.SET_NULL, blank=True, null=True
     )
     group = models.ForeignKey(Group, on_delete=models.SET_NULL, blank=True, null=True)
+    problem = models.ForeignKey(
+        Problem, on_delete=models.CASCADE, blank=False, null=False
+    )
+    first_user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        blank=True,
+        null=False,
+        related_name="round_first_user",
+    )
+    second_user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        blank=True,
+        null=False,
+        related_name="round_second_user",
+    )
     first_submission = models.ForeignKey(
         Submission,
         on_delete=models.CASCADE,
-        blank=False,
-        null=False,
+        blank=True,
+        null=True,
         related_name="round_first_submission",
     )
     second_submission = models.ForeignKey(
         Submission,
         on_delete=models.CASCADE,
-        blank=False,
-        null=False,
+        blank=True,
+        null=True,
         related_name="round_second_submission",
     )
     num_match = models.IntegerField()
+    first_score = models.IntegerField(default=0)
+    second_score = models.IntegerField(default=0)
 
 
 class Match(models.Model):
@@ -152,21 +195,11 @@ class Match(models.Model):
         FIRST_WIN = "F"
         SECOND_WIN = "S"
         DRAW = "D"
+        IN_QUEUE = "Q"
 
     round = models.ForeignKey(Round, on_delete=models.CASCADE, blank=False, null=False)
-    first_submission = models.ForeignKey(
-        Submission,
-        on_delete=models.CASCADE,
-        blank=False,
-        null=False,
-        related_name="match_first_submission",
-    )
-    second_submission = models.ForeignKey(
-        Submission,
-        on_delete=models.CASCADE,
-        blank=False,
-        null=False,
-        related_name="match_second_submission",
-    )
-    status = models.CharField(max_length=1, choices=MatchStatus.choices, default="D")
+    testcase = models.IntegerField()
+    status = models.CharField(max_length=1, choices=MatchStatus.choices, default="Q")
     history = models.JSONField()
+    first_score = models.IntegerField(default=0)
+    second_score = models.IntegerField(default=0)

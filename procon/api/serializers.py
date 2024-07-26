@@ -145,10 +145,72 @@ class SubmissionSerializer(serializers.ModelSerializer):
         fields = (
             "user",
             "problem",
+            "submission_time",
             "language",
             "code",
             "status",
             "total_point",
             "time",
             "memory",
+        )
+
+
+class ListTournamentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Tournament
+        fields = (
+            "id",
+            "name",
+        )
+
+
+class TournamentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Tournament
+        fields = (
+            "id",
+            "name",
+            "creators",
+            "participants",
+            "tournament_table",
+            "num_group",
+            "start_submission_time",
+            "end_submission_time",
+            "start_combat_time",
+            "end_combat_time",
+        )
+
+
+class GroupSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Group
+        fields = ("id", "tournament", "participants",  "status")
+
+
+class RoundSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Round
+        fields = (
+            "id",
+            "tournament",
+            "group",
+            "first_user",
+            "second_user",
+            "first_submission",
+            "second_submission",
+            "num_match",
+        )
+
+
+class MatchSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Match
+        fields = (
+            "id",
+            "round",
+            "testcase",
+            "status",
+            "history",
+            "first_score",
+            "second_score",
         )
