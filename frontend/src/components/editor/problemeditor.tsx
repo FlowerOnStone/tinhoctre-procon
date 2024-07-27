@@ -1,6 +1,5 @@
 "use client";
 import React from 'react';
-import { Editor } from '@tinymce/tinymce-react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm, FormProvider, SubmitHandler } from 'react-hook-form';
 import { z } from 'zod';
@@ -93,7 +92,7 @@ const ProblemEditor: React.FC<Problem> = ({ data }) => {
               <FormItem>
                 <FormLabel>Nội dung</FormLabel>
                 <FormControl>
-                <Editor
+                {/* <Editor
                         apiKey='cdrgwokkdjisah1kxyv2xdszihjq1qqmzvr4cl2l8vpsx743'
                         init={{
                         height: 800,
@@ -103,7 +102,7 @@ const ProblemEditor: React.FC<Problem> = ({ data }) => {
                         }}
                         initialValue={data?.htmlContent || '<p style = "text-align: center">Thêm Bài tập mới tại đây</p>'}
                         onEditorChange={(content) => methods.setValue('htmlContent', content)}
-                    />
+                    /> */}
                 </FormControl>
                 <FormMessage>{methods.formState.errors.htmlContent?.message}</FormMessage>
               </FormItem>

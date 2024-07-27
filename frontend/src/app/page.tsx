@@ -1,8 +1,7 @@
-import ProblemEditor from '@/components/editor/problemeditor';
-import Image from 'next/image';
+import DetailTable from "@/components/tournament/detail/detailtable";
 
-export default async function DemoPage() {
+export default async function GeneralTournamentPage() {
   return (
-    <ProblemEditor/>
-  );
+    <DetailTable/>
+  )
 }
