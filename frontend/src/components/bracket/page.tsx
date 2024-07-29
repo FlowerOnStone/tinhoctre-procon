@@ -279,7 +279,8 @@ const TournamentBracket: React.FC = () => {
   };
 
   return (
-    <div style={{ margin: "5%" }}>
+    <div>
+      <h1 className="text-3xl mb-4 mt-8 font-bold">Vòng loại trực tiếp</h1>
       <table style={{ width: "100%", borderCollapse: "collapse" }}>
         <tbody>
           {rows.map((_, rowIndex) => (
