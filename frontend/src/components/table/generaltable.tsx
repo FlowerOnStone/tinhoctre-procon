@@ -27,9 +27,10 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
+  show?: boolean;
 }
 
-export function DataTable<TData, TValue>({ columns, data }: DataTableProps<TData, TValue>) {
+export function DataTable<TData, TValue>({ columns, data, show = true }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
   const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({});
@@ -57,12 +58,12 @@ export function DataTable<TData, TValue>({ columns, data }: DataTableProps<TData
   return (
     <div className="w-full">
       <div className="flex items-center py-4">
-        <Input
+        {show && <Input
           placeholder="Tìm tên ở đây..."
           value={(table.getColumn('name')?.getFilterValue() as string) ?? ''}
           onChange={(event) => table.getColumn('name')?.setFilterValue(event.target.value)}
           className="max-w-sm"
-        />
+        />}
         {/* <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="outline" className="ml-auto">
@@ -124,7 +125,7 @@ export function DataTable<TData, TValue>({ columns, data }: DataTableProps<TData
           </TableBody>
         </Table>
       </div>
-      <div className="flex items-center justify-end space-x-2 py-4">
+      {show && <div className="flex items-center justify-end space-x-2 py-4">
         <div className="flex-1 text-sm text-muted-foreground">
           Đã chọn {table.getFilteredSelectedRowModel().rows.length} trong {table.getFilteredRowModel().rows.length} cột.
         </div>
@@ -141,7 +142,7 @@ export function DataTable<TData, TValue>({ columns, data }: DataTableProps<TData
             Sau
           </Button>
         </div>
-      </div>
+      </div>}
     </div>
   );
 }
