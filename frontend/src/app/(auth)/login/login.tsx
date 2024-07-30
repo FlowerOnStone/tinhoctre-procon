@@ -34,7 +34,7 @@ export default function Login() {
   }
 
   return (
-    <main className="w-full h-screen flex flex-col items-center justify-center px-24">
+    <div className="w-full h-screen flex flex-col items-center justify-center px-24">
       <h1 className="text-3xl ">Đăng nhập</h1>
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8 w-1/3 p-12 bg-[#EEEEEE] m-12">
@@ -82,6 +82,6 @@ export default function Login() {
           </div>
         </form>
       </Form>
-    </main>
+    </div>
   );
 }
