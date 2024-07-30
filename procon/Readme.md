@@ -22,7 +22,6 @@ pip install -r requirement.txt
 
 ```
 python3 manage.py runserver
-python manage.py runserver
 ```
 
 # Tài khoản Admin cho web:
