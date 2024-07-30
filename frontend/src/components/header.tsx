@@ -8,7 +8,7 @@ const routes = [
   { name: 'Tournaments', href: '/tournaments' },
 ];
 
-export default function Header({ isFixed = true }: { isFixed?: boolean }) {
+export default function Header() {
   return (
     <header className={`fixed top-0 w-full flex justify-center bg-[#15518B] z-30 transition-all text-white`}>
       <div className="mx-5 flex h-16 max-w-screen-2xl items-center justify-between w-full">
