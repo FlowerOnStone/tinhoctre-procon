@@ -20,7 +20,16 @@ admin.site.register(Timezone, TimezoneAdmin)
 
 admin.site.register(Problem)
 admin.site.register(Submission)
-admin.site.register(Tournament)
+
+
+class TournamentAdmin(admin.ModelAdmin):
+    list_display = ("id", "name", "num_group", "problem")
+
+
+admin.site.register(Tournament, TournamentAdmin)
 admin.site.register(Group)
 admin.site.register(Round)
 admin.site.register(Match)
+admin.site.register(TestData)
+admin.site.register(DefaultSubmission)
+admin.site.register(Challenge)

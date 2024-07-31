@@ -18,9 +18,11 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={inter.className}>
-        <Header isFixed={false} />
-        <main className="w-full h-full">{children}</main>
+      <body className={`${inter.className} relative`}>
+        <Header />
+        <main className="absolute top-0 pt-16 w-full h-full">
+          <div className="mx-auto max-w-screen-2xl w-full my-6">{children}</div>
+        </main>
       </body>
     </html>
   );
