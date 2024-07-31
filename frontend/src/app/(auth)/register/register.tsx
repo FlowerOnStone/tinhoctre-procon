@@ -52,7 +52,7 @@ export default function Register() {
   }
 
   return (
-    <main className="w-full h-screen flex flex-col items-center justify-center px-24">
+    <main className="w-full h-screen flex flex-col items-center justify-center">
       <h1 className="text-3xl ">Đăng ký</h1>
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8 w-1/3 p-16 bg-[#EEEEEE] m-12">
