@@ -114,6 +114,12 @@ class ProblemSerializer(serializers.ModelSerializer):
         return super().update(instance, validated_data)
 
 
+class TestDataSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TestData
+        fields = ("id", "type", "test_data", "referee", "seed_generator", "generator")
+
+
 class ListSubmissionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Submission
@@ -155,6 +161,15 @@ class SubmissionSerializer(serializers.ModelSerializer):
         )
 
 
+class DefaultSubmissionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = DefaultSubmission
+        fields = (
+            "problem",
+            "submission",
+        )
+
+
 class ListTournamentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Tournament
@@ -184,7 +199,7 @@ class TournamentSerializer(serializers.ModelSerializer):
 class GroupSerializer(serializers.ModelSerializer):
     class Meta:
         model = Group
-        fields = ("id", "tournament", "participants",  "status")
+        fields = ("id", "tournament", "index", "participants", "status")
 
 
 class RoundSerializer(serializers.ModelSerializer):
@@ -199,6 +214,9 @@ class RoundSerializer(serializers.ModelSerializer):
             "first_submission",
             "second_submission",
             "num_match",
+            "first_score",
+            "second_score",
+            "status",
         )
 
 
@@ -214,3 +232,9 @@ class MatchSerializer(serializers.ModelSerializer):
             "first_score",
             "second_score",
         )
+
+
+class ChallengeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Challenge
+        fields = ("first_user", "second_user", "problem", "status")
