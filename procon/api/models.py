@@ -1,6 +1,7 @@
 from django.db import models
-from django.conf import Settings
+from django.conf import settings
 from django.contrib.auth.models import User
+import os
 
 # Create your models here.
 
@@ -11,6 +12,7 @@ class ProgramLanguage(models.Model):
 
     name = models.CharField(max_length=16)
     compile_args = models.CharField(max_length=64)
+    extension = models.CharField(max_length=3)
 
 
 class Timezone(models.Model):
@@ -51,12 +53,62 @@ class Problem(models.Model):
     time_limit = models.IntegerField()
     memory_limit = models.IntegerField()
     allow_language = models.BinaryField()
-    test_data = models.FileField(null=True, blank=True)
+
+
+def test_data_path(instance, filename):
+    extension = filename.split(".")[-1]
+    path = "problem/{}/testdata.{}".format(instance.id, extension)
+
+    if os.path.exists(os.path.join(settings.MEDIA_ROOT, path)):
+        os.remove(os.path.join(settings.MEDIA_ROOT, path))
+    return path
+
+
+def referee_path(instance, filename):
+    extension = filename.split(".")[-1]
+    path = "problem/{}/referee.{}".format(instance.id, extension)
+
+    if os.path.exists(os.path.join(settings.MEDIA_ROOT, path)):
+        os.remove(os.path.join(settings.MEDIA_ROOT, path))
+    return path
+
+
+def seed_generator_path(instance, filename):
+    extension = filename.split(".")[-1]
+    path = "problem/{}/seed_generator.{}".format(instance.id, extension)
+
+    if os.path.exists(os.path.join(settings.MEDIA_ROOT, path)):
+        os.remove(os.path.join(settings.MEDIA_ROOT, path))
+    return path
+
+
+def generator_path(instance, filename):
+    extension = filename.split(".")[-1]
+    path = "problem/{}/generator.{}".format(instance.id, extension)
+
+    if os.path.exists(os.path.join(settings.MEDIA_ROOT, path)):
+        os.remove(os.path.join(settings.MEDIA_ROOT, path))
+    return path
+
+
+class TestData(models.Model):
+    class TestMode(models.TextChoices):
+        RAW_TEST = "R"
+        GENERATOR = "G"
+
+    problem = models.OneToOneField(Problem, on_delete=models.CASCADE)
+    type = models.CharField(max_length=1, choices=TestMode.choices, default="G")
+    test_data = models.FileField(null=True, blank=True, upload_to=test_data_path)
+    referee = models.FileField(null=True, blank=True, upload_to=referee_path)
+    seed_generator = models.FileField(
+        null=True, blank=True, upload_to=seed_generator_path
+    )
+    generator = models.FileField(null=True, blank=True, upload_to=generator_path)
 
 
 class TestCase(models.Model):
     problem = models.ForeignKey(
-        Problem, on_delete=models.CASCADE, blank=False, null=False
+        TestData, on_delete=models.CASCADE, blank=False, null=False
     )
     sequence_number = models.IntegerField()
     input_path = models.CharField(max_length=256)
@@ -108,6 +160,13 @@ class Submission(models.Model):
     memory = models.IntegerField(default=0)
 
 
+class DefaultSubmission(models.Model):
+    problem = models.OneToOneField(Problem, on_delete=models.CASCADE)
+    submission = models.OneToOneField(
+        Submission, on_delete=models.DO_NOTHING, null=True, blank=False
+    )
+
+
 class TestCaseResult(models.Model):
     submission = models.ForeignKey(Submission, on_delete=models.CASCADE, blank=False)
     input_text = models.CharField(max_length=256)
@@ -140,16 +199,28 @@ class Tournament(models.Model):
 
 
 class Group(models.Model):
+    class GroupStatus(models.TextChoices):
+        NOT_STARTED = "N"
+        IN_PROGRESS = "I"
+        DONE = "D"
+
     tournament = models.ForeignKey(
         Tournament, on_delete=models.SET_NULL, blank=True, null=True
     )
     index = models.IntegerField()
     participants = models.ManyToManyField(User, related_name="participants")
-    status = models.IntegerField(default=0)
+    status = models.CharField(max_length=1, choices=GroupStatus.choices, default="N")
     num_match = models.IntegerField(default=0)
 
 
 class Round(models.Model):
+    class RoundStatus(models.TextChoices):
+        FIRST_WIN = "F"
+        SECOND_WIN = "S"
+        DRAW = "D"
+        IN_PROGRESS = "I"
+        NOT_STARTED = "N"
+
     tournament = models.ForeignKey(
         Tournament, on_delete=models.SET_NULL, blank=True, null=True
     )
@@ -188,6 +259,7 @@ class Round(models.Model):
     num_match = models.IntegerField()
     first_score = models.IntegerField(default=0)
     second_score = models.IntegerField(default=0)
+    status = models.CharField(max_length=1, choices=RoundStatus.choices, default="N")
 
 
 class Match(models.Model):
@@ -196,6 +268,7 @@ class Match(models.Model):
         SECOND_WIN = "S"
         DRAW = "D"
         IN_QUEUE = "Q"
+        PROCESSING = "P"
 
     round = models.ForeignKey(Round, on_delete=models.CASCADE, blank=False, null=False)
     testcase = models.IntegerField()
@@ -203,3 +276,33 @@ class Match(models.Model):
     history = models.JSONField()
     first_score = models.IntegerField(default=0)
     second_score = models.IntegerField(default=0)
+
+
+class Challenge(models.Model):
+
+    class ChallengeStatus(models.TextChoices):
+        REQUEST = "Q"
+        ACCEPT = "A"
+        REJECT = "R"
+        CANCEL = "C"
+
+    first_user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        blank=True,
+        null=False,
+        related_name="chanllenge_first_user",
+    )
+    second_user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        blank=True,
+        null=False,
+        related_name="chanllenge_second_user",
+    )
+    problem = models.ForeignKey(
+        Problem, on_delete=models.CASCADE, blank=False, null=False
+    )
+    status = models.CharField(
+        max_length=1, choices=ChallengeStatus.choices, default="Q"
+    )
