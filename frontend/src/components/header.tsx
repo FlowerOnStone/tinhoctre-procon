@@ -1,7 +1,19 @@
 'use client';
 
+import { useAppContext } from '@/app/app-provider';
 import Link from 'next/link';
 import React from 'react';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from './ui/dropdown-menu';
+import { Button } from './ui/button';
+import { LogOut, User } from 'lucide-react';
 
 const routes = [
   { name: 'Logo', href: '/' },
@@ -9,6 +21,8 @@ const routes = [
 ];
 
 export default function Header() {
+  const { user } = useAppContext();
+
   return (
     <header className={`fixed top-0 w-full flex justify-center bg-[#15518B] z-30 transition-all text-white`}>
       <div className="mx-5 flex h-16 max-w-screen-2xl items-center justify-between w-full">
@@ -19,18 +33,38 @@ export default function Header() {
             </Link>
           ))}
         </div>
-        <div className="flex gap-5">
-          {/* {session ? (
-            <UserDropdown session={session} />
-          ) : ( */}
-          <Link href="/login" className="font-display text-xl">
-            <p>Đăng nhập</p>
-          </Link>
-          <Link href="/register" className="font-display text-xl">
-            <p>Đăng ký</p>
-          </Link>
-          {/* )} */}
-        </div>
+        {user ? (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" className="text-black">
+                {user.username}
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="w-56">
+              <DropdownMenuLabel>{user.first_name}</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuGroup>
+                <DropdownMenuItem>
+                  <User className="mr-2 h-4 w-4" />
+                  <span>Profile</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem>
+                  <LogOut className="mr-2 h-4 w-4" />
+                  <span>Log out</span>
+                </DropdownMenuItem>
+              </DropdownMenuGroup>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        ) : (
+          <div className="flex gap-5">
+            <Link href="/login" className="font-display text-xl">
+              <p>Đăng nhập</p>
+            </Link>
+            <Link href="/register" className="font-display text-xl">
+              <p>Đăng ký</p>
+            </Link>
+          </div>
+        )}
       </div>
     </header>
   );

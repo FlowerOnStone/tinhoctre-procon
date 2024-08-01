@@ -5,11 +5,14 @@ import GeneralTournamentPage from '@/components/tournament/general/page';
 import SubmitPage from '@/app/submit/page';
 import ParticipantsPage from '@/components/tournament/participants/participants';
 import Problems from '@/components/tournament/problems/problems';
+import tournamentApiRequest from '@/api/tournament';
 
-export default function TournamentDetailPage() {
+export default async function TournamentDetailPage({ params }: { params: { id: string } }) {
+  const { tournament } = await tournamentApiRequest.getDetailTournament(params.id);
+
   return (
     <div>
-      <h1 className="text-4xl font-bold text-gray-700 mb-4">Tournament 1</h1>
+      <h1 className="text-4xl font-bold text-gray-700 mb-4">{tournament?.name}</h1>
 
       <div className="bg-blue-50 border-l-4 border-blue-500 p-4 mb-6 flex justify-between items-center">
         <p className="text-gray-700">The tournament will be held on 2021-01-01</p>
