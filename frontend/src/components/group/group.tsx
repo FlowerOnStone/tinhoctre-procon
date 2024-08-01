@@ -58,7 +58,7 @@ const data: Group[] = [
 export const columns: ColumnDef<Group>[] = [
   {
     accessorKey: "name",
-    header: "Tên người chơi",
+    header: "Tên thí sinh",
     cell: ({ row }) => (
       <div className="capitalize">{row.getValue("name")}</div>
     ),

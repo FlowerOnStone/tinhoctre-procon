@@ -35,5 +35,5 @@ const columns: ColumnDef<Problem>[] = [
 ];
 
 export default function Problems() {
-  return <DataTable data={data} columns={columns}></DataTable>;
+  return <DataTable show={false} data={data} columns={columns}></DataTable>;
 }

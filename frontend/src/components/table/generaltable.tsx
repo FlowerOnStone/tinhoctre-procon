@@ -125,24 +125,26 @@ export function DataTable<TData, TValue>({ columns, data, show = true }: DataTab
           </TableBody>
         </Table>
       </div>
-      {show && <div className="flex items-center justify-end space-x-2 py-4">
-        <div className="flex-1 text-sm text-muted-foreground">
+      <div className="flex items-center justify-end space-x-2 py-4">
+      {show && <div className="flex-1 text-sm text-muted-foreground">
           Đã chọn {table.getFilteredSelectedRowModel().rows.length} trong {table.getFilteredRowModel().rows.length} cột.
-        </div>
-        <div className="space-x-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => table.previousPage()}
-            disabled={!table.getCanPreviousPage()}
-          >
-            Trước
-          </Button>
-          <Button variant="outline" size="sm" onClick={() => table.nextPage()} disabled={!table.getCanNextPage()}>
-            Sau
-          </Button>
-        </div>
-      </div>}
+        </div>}
+        {data.length > 10 && 
+          <div className="space-x-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => table.previousPage()}
+              disabled={!table.getCanPreviousPage()}
+            >
+              Trước
+            </Button>
+            <Button variant="outline" size="sm" onClick={() => table.nextPage()} disabled={!table.getCanNextPage()}>
+              Sau
+            </Button>
+          </div>
+        }
+      </div>
     </div>
   );
 }

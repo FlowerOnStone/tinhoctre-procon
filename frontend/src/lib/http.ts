@@ -30,7 +30,7 @@ const request = async <Response>(
         };
   if (isClient()) {
     const token = localStorage.getItem('token');
-    if (token) {
+    if (token !== 'undefined') {
       baseHeaders.Authorization = `token ${token}`;
     }
   }

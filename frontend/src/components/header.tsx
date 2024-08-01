@@ -2,7 +2,7 @@
 
 import { useAppContext } from '@/app/app-provider';
 import Link from 'next/link';
-import React from 'react';
+import React, { useState } from 'react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -17,21 +17,49 @@ import { LogOut, User } from 'lucide-react';
 
 const routes = [
   { name: 'Logo', href: '/' },
-  { name: 'Tournaments', href: '/tournaments' },
+  { name: 'Cuộc thi', href: '/tournaments' },
 ];
 
 export default function Header() {
   const { user } = useAppContext();
+  const [hoverStates, setHoverStates] = useState<{ [key: string]: boolean }>({});
+
+  const handleMouseEnter = (key: string) => {
+    setHoverStates((prevStates) => ({ ...prevStates, [key]: true }));
+  };
+
+  const handleMouseLeave = (key: string) => {
+    setHoverStates((prevStates) => ({ ...prevStates, [key]: false }));
+  };
 
   return (
-    <header className={`fixed top-0 w-full flex justify-center bg-[#15518B] z-30 transition-all text-white`}>
-      <div className="mx-5 flex h-16 max-w-screen-2xl items-center justify-between w-full">
+    <header className="fixed top-0 w-full flex justify-center bg-[#15518B] z-30 transition-all text-white">
+      <div style={{ margin: '0px 50px' }} className="flex h-16 max-w-screen-2xl items-center justify-between w-full">
         <div className="flex gap-5">
-          {routes.map((route) => (
-            <Link key={route.href} href={route.href} className="font-display text-xl">
-              <p>{route.name}</p>
-            </Link>
-          ))}
+          {routes.map((route) => {
+            const isHovered = hoverStates[route.href] || false;
+            const linkStyle: React.CSSProperties = {
+              fontWeight: isHovered ? '600' : undefined,
+              transition: 'color 0.3s, font-weight 0.3s, text-decoration 0.3s',
+              fontSize: '16px' 
+            };
+
+            return (
+              <Link
+                key={route.href}
+                href={route.href}
+                className="font-display text-xl"
+              >
+                <p
+                  style={linkStyle}
+                  onMouseEnter={() => handleMouseEnter(route.href)}
+                  onMouseLeave={() => handleMouseLeave(route.href)}
+                >
+                  {route.name}
+                </p>
+              </Link>
+            );
+          })}
         </div>
         {user ? (
           <DropdownMenu>
@@ -57,12 +85,28 @@ export default function Header() {
           </DropdownMenu>
         ) : (
           <div className="flex gap-5">
-            <Link href="/login" className="font-display text-xl">
-              <p>Đăng nhập</p>
-            </Link>
-            <Link href="/register" className="font-display text-xl">
-              <p>Đăng ký</p>
-            </Link>
+            {['/login', '/register'].map((href) => {
+              const isHovered = hoverStates[href] || false;
+              const buttonStyle: React.CSSProperties = {
+                fontWeight: isHovered ? '600' : undefined,
+                transition: 'color 0.3s, font-weight 0.3s, text-decoration 0.3s',
+                fontSize: '16px'
+              };
+
+              const buttonText = href === '/login' ? 'Đăng nhập' : 'Đăng ký';
+
+              return (
+                <Link key={href} href={href} className="font-display text-xl">
+                  <p
+                    style={buttonStyle}
+                    onMouseEnter={() => handleMouseEnter(href)}
+                    onMouseLeave={() => handleMouseLeave(href)}
+                  >
+                    {buttonText}
+                  </p>
+                </Link>
+              );
+            })}
           </div>
         )}
       </div>

@@ -34,5 +34,5 @@ export default function ParticipantsPage() {
     },
   ];
 
-  return <DataTable data={data} columns={participantColumns}></DataTable>;
+  return <DataTable show={false} data={data} columns={participantColumns}></DataTable>;
 }

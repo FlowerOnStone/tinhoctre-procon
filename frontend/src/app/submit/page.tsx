@@ -50,7 +50,7 @@ export default async function SubmitPage() {
       <h1 className="text-3xl mb-4 mt-8 font-bold">Quản lý bài nộp</h1>
       <div className="flex gap-10">
         <div className="flex-[7]">
-          <DataTable data={data} columns={submitColumns}></DataTable>
+          <DataTable show={false} data={data} columns={submitColumns}></DataTable>
         </div>
         <div className="max-w-md mx-auto my-10 flex-[3]">
           <div className="border border-gray-300 rounded-md overflow-hidden">

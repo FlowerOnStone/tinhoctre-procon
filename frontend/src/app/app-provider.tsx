@@ -38,7 +38,17 @@ export default function AppProvider({ children }: { children: React.ReactNode })
 
   useEffect(() => {
     const _user = localStorage.getItem('user');
-    setUserState(_user ? JSON.parse(_user) : null);
+    
+    if (_user && _user !== "undefined") {
+      try {
+        setUserState(JSON.parse(_user));
+      } catch (error) {
+        console.error("Error parsing user data from localStorage:", error);
+        setUserState(null); 
+      }
+    } else {
+      setUserState(null); 
+    }
   }, [setUserState]);
 
   return (
