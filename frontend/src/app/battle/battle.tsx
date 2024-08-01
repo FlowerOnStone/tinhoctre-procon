@@ -5,10 +5,10 @@ import LanguagesDropdown from '@/components/battle/languages-dropdown';
 import ThemeDropdown from '@/components/battle/theme-dropdown';
 import Timer from '@/components/battle/timer';
 import { Button } from '@/components/ui/button';
-import { languageOptions } from '@/lib/languageOptions';
 import React, { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import Link from 'next/link';
+import { ListProgrammingLanguageType } from '@/schema/common';
 
 const javascriptDefault = `/**
 * Problem: Binary Search: Search a sorted array for a target value.
@@ -40,10 +40,14 @@ const target = 5;
 console.log(binarySearch(arr, target));
 `;
 
-export default function Play() {
+interface PlayProps {
+  programmingLanguages: ListProgrammingLanguageType;
+}
+
+export default function Play({ programmingLanguages }: PlayProps) {
   const [code, setCode] = useState(javascriptDefault);
   const [theme, setTheme] = useState('cobalt');
-  const [language, setLanguage] = useState(languageOptions[6]);
+  const [language, setLanguage] = useState('javascript');
 
   const onSelectChange = (sl: any) => {
     console.log('selected Option...', sl);
@@ -142,7 +146,7 @@ export default function Play() {
       <div className="w-full bg-stone-300">
         <div className="flex flex-row">
           <div className="px-4 py-2">
-            <LanguagesDropdown onSelectChange={onSelectChange} />
+            <LanguagesDropdown onSelectChange={onSelectChange} programmingLanguages={programmingLanguages} />
           </div>
           <div className="px-4 py-2">{/* <ThemeDropdown handleThemeChange={handleThemeChange} theme={theme} /> */}</div>
         </div>
