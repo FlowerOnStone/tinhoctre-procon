@@ -1,59 +1,32 @@
 'use client';
 
-import { isClient } from '@/lib/http';
-import { LoginResType } from '@/schema/user';
+import { User } from '@/schema/user';
 import { createContext, useCallback, useContext, useEffect, useState } from 'react';
-
-type User = LoginResType['user'];
 
 const AppContext = createContext<{
   user: User | null;
   setUser: (user: User | null) => void;
-  isAuthenticated: boolean;
 }>({
   user: null,
   setUser: () => {},
-  isAuthenticated: false,
 });
 export const useAppContext = () => {
   const context = useContext(AppContext);
   return context;
 };
 export default function AppProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUserState] = useState<User | null>(() => {
-    // if (isClient()) {
-    //   const _user = localStorage.getItem('user')
-    //   return _user ? JSON.parse(_user) : null
-    // }
-    return null;
-  });
-  const isAuthenticated = Boolean(user);
+  const [user, setUserState] = useState<User | null>(null);
   const setUser = useCallback(
     (user: User | null) => {
       setUserState(user);
-      if (user === null) {
-        localStorage.removeItem('user');  
-      }
-      else {
-        localStorage.setItem('user', JSON.stringify(user));
-      }
+      localStorage.setItem('user', JSON.stringify(user));
     },
     [setUserState]
   );
 
   useEffect(() => {
     const _user = localStorage.getItem('user');
-    
-    if (_user && _user !== "undefined") {
-      try {
-        setUserState(JSON.parse(_user));
-      } catch (error) {
-        console.error("Error parsing user data from localStorage:", error);
-        setUserState(null); 
-      }
-    } else {
-      setUserState(null); 
-    }
+    setUserState(_user ? JSON.parse(_user) : null);
   }, [setUserState]);
 
   return (
@@ -61,7 +34,6 @@ export default function AppProvider({ children }: { children: React.ReactNode })
       value={{
         user,
         setUser,
-        isAuthenticated,
       }}
     >
       {children}

@@ -45,8 +45,8 @@ export default function Register({ timezones, programmingLanguages }: RegisterPr
       const response = await userApiRequest.register(values);
 
       await userApiRequest.auth({ token: response.token });
-
-      setUser(response.user);
+      const user = { ...response.user, is_admin: response.is_admin };
+      setUser(user);
       router.push('/');
       router.refresh();
     } catch (error: any) {
@@ -160,7 +160,8 @@ export default function Register({ timezones, programmingLanguages }: RegisterPr
                   <Select
                     onValueChange={field.onChange}
                     defaultValue={
-                      timezones.find((timezone) => timezone.location === 'Ho_Chi_Minh')?.id.toString() || timezones[0].id.toString()
+                      timezones.find((timezone) => timezone.location === 'Ho_Chi_Minh')?.id.toString() ||
+                      timezones[0].id.toString()
                     }
                   >
                     <FormControl>
@@ -170,11 +171,13 @@ export default function Register({ timezones, programmingLanguages }: RegisterPr
                     </FormControl>
                     <SelectContent>
                       {timezones
-                        .slice() 
-                        .sort((a, b) => a.offset_dst - b.offset_dst) 
+                        .slice()
+                        .sort((a, b) => a.offset_dst - b.offset_dst)
                         .map((timezone) => (
                           <SelectItem key={timezone.id} value={timezone.id.toString()}>
-                            {`${timezone.location} (GMT${timezone.offset_dst >= 0 ? '+' : ''}${timezone.offset_dst / 3600})`}
+                            {`${timezone.location} (GMT${timezone.offset_dst >= 0 ? '+' : ''}${
+                              timezone.offset_dst / 3600
+                            })`}
                           </SelectItem>
                         ))}
                     </SelectContent>

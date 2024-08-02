@@ -56,3 +56,5 @@ export const LoginRes = z.object({
 export type LoginResType = z.infer<typeof LoginRes>;
 
 export type RegisterResType = LoginResType;
+
+export type User = LoginResType['user'] & { is_admin: boolean };

@@ -32,7 +32,9 @@ export default function Login() {
       const response = await userApiRequest.login(values);
       await userApiRequest.auth({ token: response.token });
 
-      setUser(response.user);
+      // add attribute to response.user
+      const user = { ...response.user, is_admin: response.is_admin };
+      setUser(user);
       router.push('/');
       router.refresh();
     } catch (error: any) {
