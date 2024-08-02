@@ -33,8 +33,8 @@ export default function Register({ timezones, programmingLanguages }: RegisterPr
       email: '',
       first_name: '',
       last_name: '',
-      preferred_language: 11,
-      timezone: 1,
+      preferred_language: 1,
+      timezone: timezones.find((timezone) => timezone.location === 'Ho_Chi_Minh')?.id || timezones[0].id,
     },
   });
 
@@ -156,19 +156,27 @@ export default function Register({ timezones, programmingLanguages }: RegisterPr
             render={({ field }) => (
               <FormItem>
                 <div className="flex w-full items-center">
-                  <FormLabel className="min-w-36">Timezone</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={timezones[0].id.toString()}>
+                  <FormLabel className="min-w-36">Múi giờ</FormLabel>
+                  <Select
+                    onValueChange={field.onChange}
+                    defaultValue={
+                      timezones.find((timezone) => timezone.location === 'Ho_Chi_Minh')?.id.toString() || timezones[0].id.toString()
+                    }
+                  >
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      {timezones.map((timezone) => (
-                        <SelectItem key={timezone.id} value={timezone.id.toString()}>
-                          {timezone.zone}
-                        </SelectItem>
-                      ))}
+                      {timezones
+                        .slice() 
+                        .sort((a, b) => a.offset_dst - b.offset_dst) 
+                        .map((timezone) => (
+                          <SelectItem key={timezone.id} value={timezone.id.toString()}>
+                            {`${timezone.location} (GMT${timezone.offset_dst >= 0 ? '+' : ''}${timezone.offset_dst / 3600})`}
+                          </SelectItem>
+                        ))}
                     </SelectContent>
                   </Select>
                 </div>

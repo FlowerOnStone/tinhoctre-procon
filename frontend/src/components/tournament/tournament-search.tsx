@@ -45,7 +45,7 @@ export default function TournamentSearch() {
       <form onSubmit={form.handleSubmit(onSubmit)}>
         <Card>
           <CardHeader>
-            <CardTitle>Tournament Search</CardTitle>
+            <CardTitle style={{color: '#14518B'}}>Tìm kiếm cuộc thi</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="grid w-full items-center gap-4">
@@ -54,9 +54,9 @@ export default function TournamentSearch() {
                 name="name"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Name</FormLabel>
+                    <FormLabel>Tên</FormLabel>
                     <FormControl>
-                      <Input {...field} placeholder="Search Tournament" />
+                      <Input {...field} placeholder="Tìm kiếm kỳ thi" />
                     </FormControl>
                   </FormItem>
                 )}
@@ -66,16 +66,16 @@ export default function TournamentSearch() {
                 name="orderBy"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="min-w-36">OrderBy</FormLabel>
-                    <Select onValueChange={field.onChange}>
+                    <FormLabel className="min-w-36">Sắp xếp bởi</FormLabel>
+                    <Select defaultValue='name' onValueChange={field.onChange}>
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder="Select" />
                         </SelectTrigger>
                       </FormControl>
-                      <SelectContent>
-                        <SelectItem value="name">Name</SelectItem>
-                        <SelectItem value="date">Date</SelectItem>
+                      <SelectContent defaultValue={'name'}>
+                        <SelectItem value="name">Tên cuộc thi</SelectItem>
+                        <SelectItem value="date">Ngày thi</SelectItem>
                       </SelectContent>
                     </Select>
                   </FormItem>
@@ -84,7 +84,7 @@ export default function TournamentSearch() {
             </div>
           </CardContent>
           <CardFooter className="grid w-full justify-items-end">
-            <Button type="submit">Search</Button>
+            <Button style={{backgroundColor: '#14518B'}} type="submit">Tìm kiếm</Button>
           </CardFooter>
         </Card>
       </form>

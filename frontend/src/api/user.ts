@@ -3,7 +3,8 @@ import { LoginBodyType, LoginResType, RegisterBodyType, RegisterResType } from '
 
 const userApiRequest = {
   login: (body: LoginBodyType) => http.post<LoginResType>('/api/login/', body),
-  register: (body: RegisterBodyType) => http.post<RegisterResType>('/auth/register', body),
+  register: (body: RegisterBodyType) => http.post<RegisterResType>('/api/register/', body),
+  logout: () => http.post<{}>('/api/logout/', undefined),
   auth: (body: { token: string }) =>
     http.post('/api/auth', body, {
       baseUrl: '',
