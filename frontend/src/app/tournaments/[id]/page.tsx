@@ -25,7 +25,7 @@ export default function TournamentDetailPage({ params }: { params: { id: string 
   }, [params.id]);
 
   return (
-    <div>
+    <div className="my-0 mx-10">
       <h1 className="text-4xl font-bold text-gray-700 mb-4">{tournament?.name}</h1>
 
       <div className="flex flex-col gap-1 mb-4">
@@ -50,19 +50,19 @@ export default function TournamentDetailPage({ params }: { params: { id: string 
       <Tabs defaultValue="problems">
         <TabsList className="w-full flex justify-start h-12 rounded-none">
           <TabsTrigger value="problems" className="truncate justify-center min-w-[200px] h-[40px] rounded-none">
-            Problems
+            Bài toán
           </TabsTrigger>
           <TabsTrigger value="participants" className="truncate justify-center min-w-[200px] h-[40px] rounded-none">
-            Participants
+            Thí sinh tham gia
           </TabsTrigger>
           <TabsTrigger value="group" className="truncate justify-center min-w-[200px] h-[40px] rounded-none">
-            Group
+            Vòng bảng
           </TabsTrigger>
           <TabsTrigger value="bracket" className="truncate justify-center min-w-[200px] h-[40px] rounded-none">
-            Bracket
+            Vòng loại trực tiếp
           </TabsTrigger>
           <TabsTrigger value="submission" className="truncate justify-center min-w-[200px] h-[40px] rounded-none">
-            Submission
+            Bài nộp
           </TabsTrigger>
         </TabsList>
         <TabsContent value="problems">

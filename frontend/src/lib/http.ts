@@ -18,7 +18,7 @@ const request = async <Response>(
   if (options?.body instanceof FormData) {
     body = options.body;
   } else if (options?.body) {
-    body = JSON.stringify(options.body);
+    body = JSON.stringify(options?.body);
   }
   const baseHeaders: {
     [key: string]: string;
@@ -49,6 +49,14 @@ const request = async <Response>(
     method,
   });
 
+  const contentType = res.headers.get('Content-Type');
+  let data: Response;
+  if (contentType && contentType.includes('application/json')) {
+    data = await res.json();
+  } else {
+    data = (await res.text()) as unknown as Response;
+  }
+
   // Interceptor
   if (!res.ok) {
     if (res.status === AUTHENTICATION_ERROR_STATUS) {
@@ -56,18 +64,14 @@ const request = async <Response>(
     }
   }
 
-  if (res.status === 204) {
-    throw new Error('No content');
-  }
-
-  const data: Response = await res.json();
-
   if (isClient()) {
     if (['api/login/', 'api/register/'].some((item) => item === normalizePath(url))) {
-      const { token } = data as LoginResType;
+      const { token, is_admin } = data as LoginResType;
       localStorage.setItem('token', token);
+      localStorage.setItem('role', is_admin ? 'admin' : 'user');
     } else if ('api/logout/' === normalizePath(url)) {
       localStorage.removeItem('token');
+      localStorage.removeItem('role');
     }
   }
 

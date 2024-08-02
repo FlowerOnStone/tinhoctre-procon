@@ -31,14 +31,29 @@ export default function AppProvider({ children }: { children: React.ReactNode })
   const setUser = useCallback(
     (user: User | null) => {
       setUserState(user);
-      localStorage.setItem('user', JSON.stringify(user));
+      if (user === null) {
+        localStorage.removeItem('user');  
+      }
+      else {
+        localStorage.setItem('user', JSON.stringify(user));
+      }
     },
     [setUserState]
   );
 
   useEffect(() => {
     const _user = localStorage.getItem('user');
-    setUserState(_user ? JSON.parse(_user) : null);
+    
+    if (_user && _user !== "undefined") {
+      try {
+        setUserState(JSON.parse(_user));
+      } catch (error) {
+        console.error("Error parsing user data from localStorage:", error);
+        setUserState(null); 
+      }
+    } else {
+      setUserState(null); 
+    }
   }, [setUserState]);
 
   return (

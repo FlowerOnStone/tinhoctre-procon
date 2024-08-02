@@ -2,7 +2,7 @@
 import ProblemEditor from '@/components/editor/problemeditor';
 import { columns, Group } from '@/components/group/group';
 import { DataTable } from '@/components/table/generaltable';
-import Link from 'next/link';
+import InteractiveLink from './interactivelink';
 
 function getData(): Group[] {
   // Fetch data from your API here.
@@ -41,80 +41,64 @@ export default function GeneralTournamentPage() {
     <div className="mx-auto max-w-screen-2xl w-full mb-6">
       <h1 className="text-3xl mb-4 mt-8 font-bold">Vòng bảng</h1>
       <div style={{ display: 'flex', justifyContent: 'space-around', marginBottom: '5%' }}>
-        <div style={{ width: '45%' }}>
+        <div style={{ width: '47.5%' }}>
           <h2 style={{ textAlign: 'center' }}>
-            <Link href={groupRoute} style={{ fontSize: 24, fontWeight: 'bold' }}>
-              Bảng A
-            </Link>
+            <InteractiveLink href={groupRoute}>Bảng A</InteractiveLink>
           </h2>
           <DataTable data={data} columns={columns} show={false} />
         </div>
 
-        <div style={{ width: '45%' }}>
+        <div style={{ width: '47.5%' }}>
           <h2 style={{ textAlign: 'center' }}>
-            <Link href={groupRoute} style={{ fontSize: 24, fontWeight: 'bold' }}>
-              Bảng B
-            </Link>
+            <InteractiveLink href={groupRoute}>Bảng B</InteractiveLink>
           </h2>
           <DataTable data={data} columns={columns} show={false} />
         </div>
       </div>
 
       <div style={{ display: 'flex', justifyContent: 'space-around', marginBottom: '5%' }}>
-        <div style={{ width: '45%' }}>
+        <div style={{ width: '47.5%' }}>
           <h2 style={{ textAlign: 'center' }}>
-            <Link href={groupRoute} style={{ fontSize: 24, fontWeight: 'bold' }}>
-              Bảng A
-            </Link>
+            <InteractiveLink href={groupRoute}>Bảng A</InteractiveLink>
           </h2>
           <DataTable data={data} columns={columns} show={false} />
         </div>
 
-        <div style={{ width: '45%' }}>
+        <div style={{ width: '47.5%' }}>
           <h2 style={{ textAlign: 'center' }}>
-            <Link href={groupRoute} style={{ fontSize: 24, fontWeight: 'bold' }}>
-              Bảng B
-            </Link>
+            <InteractiveLink href={groupRoute}>Bảng B</InteractiveLink>
           </h2>
           <DataTable data={data} columns={columns} show={false} />
         </div>
       </div>
 
       <div style={{ display: 'flex', justifyContent: 'space-around', marginBottom: '5%' }}>
-        <div style={{ width: '45%' }}>
+        <div style={{ width: '47.5%' }}>
           <h2 style={{ textAlign: 'center' }}>
-            <Link href={groupRoute} style={{ fontSize: 24, fontWeight: 'bold' }}>
-              Bảng A
-            </Link>
+            <InteractiveLink href={groupRoute}>Bảng A</InteractiveLink>
           </h2>
           <DataTable data={data} columns={columns} show={false} />
         </div>
 
-        <div style={{ width: '45%' }}>
+        <div style={{ width: '47.5%' }}>
           <h2 style={{ textAlign: 'center' }}>
-            <Link href={groupRoute} style={{ fontSize: 24, fontWeight: 'bold' }}>
-              Bảng B
-            </Link>
+            <InteractiveLink href={groupRoute}>Bảng B</InteractiveLink>
           </h2>
           <DataTable data={data} columns={columns} show={false} />
         </div>
       </div>
 
       <div style={{ display: 'flex', justifyContent: 'space-around', marginBottom: '5%' }}>
-        <div style={{ width: '45%' }}>
+        <div style={{ width: '47.5%' }}>
           <h2 style={{ textAlign: 'center' }}>
-            <Link href={groupRoute} style={{ fontSize: 24, fontWeight: 'bold' }}>
-              Bảng A
-            </Link>
+            <InteractiveLink href={groupRoute}>Bảng A</InteractiveLink>
           </h2>
           <DataTable data={data} columns={columns} show={false} />
         </div>
 
-        <div style={{ width: '45%' }}>
+        <div style={{ width: '47.5%' }}>
           <h2 style={{ textAlign: 'center' }}>
-            <Link href={groupRoute} style={{ fontSize: 24, fontWeight: 'bold' }}>
-              Bảng B
-            </Link>
+            <InteractiveLink href={groupRoute}>Bảng B</InteractiveLink>
           </h2>
           <DataTable data={data} columns={columns} show={false} />
         </div>
