@@ -1,8 +1,10 @@
+'use client';
+import ProblemEditor from '@/components/editor/problemeditor';
 import { columns, Group } from '@/components/group/group';
 import { DataTable } from '@/components/table/generaltable';
 import InteractiveLink from './interactivelink';
 
-async function getData(): Promise<Group[]> {
+function getData(): Group[] {
   // Fetch data from your API here.
   return [
     {
@@ -32,13 +34,12 @@ async function getData(): Promise<Group[]> {
   ];
 }
 
-export default async function GeneralTournamentPage() {
-  const data = await getData();
+export default function GeneralTournamentPage() {
+  const data = getData();
   const groupRoute = '/group/';
-
   return (
-    <div className='mx-auto max-w-screen-2xl w-full mb-6'>
-      <h1 className='text-3xl mb-4 mt-8 font-bold'>Vòng bảng</h1>
+    <div className="mx-auto max-w-screen-2xl w-full mb-6">
+      <h1 className="text-3xl mb-4 mt-8 font-bold">Vòng bảng</h1>
       <div style={{ display: 'flex', justifyContent: 'space-around', marginBottom: '5%' }}>
         <div style={{ width: '47.5%' }}>
           <h2 style={{ textAlign: 'center' }}>

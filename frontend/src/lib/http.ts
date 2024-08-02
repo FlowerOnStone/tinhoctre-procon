@@ -48,13 +48,13 @@ const request = async <Response>(
     body,
     method,
   });
-  
+
   const contentType = res.headers.get('Content-Type');
   let data: Response;
   if (contentType && contentType.includes('application/json')) {
     data = await res.json();
   } else {
-    data = await res.text() as unknown as Response;
+    data = (await res.text()) as unknown as Response;
   }
 
   // Interceptor
@@ -63,8 +63,6 @@ const request = async <Response>(
       // logout
     }
   }
-
-  
 
   if (isClient()) {
     if (['api/login/', 'api/register/'].some((item) => item === normalizePath(url))) {

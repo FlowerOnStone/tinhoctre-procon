@@ -14,7 +14,7 @@ import {
 } from './ui/dropdown-menu';
 import { Button } from './ui/button';
 import { LogOut, User } from 'lucide-react';
-import { Logout } from '@/app/(auth)/logout/logout';
+import { Logout } from '@/components/logout';
 
 const userRoutes = [
   { name: 'Logo', href: '/' },
@@ -28,18 +28,18 @@ const Header: React.FC = (): JSX.Element => {
 export default Header;
 
 const enableHoverEffect = (e: any) => {
-  ( e.currentTarget ).style.fontWeight = '600';
-  ( e.currentTarget ).style.transition = 'color 0.3s, font-weight 0.3s';
-  ( e.currentTarget ).style.fontSize = 'fontSize: 16px';
-  ( e.currentTarget ).style.cursor = 'pointer';
-}
+  e.currentTarget.style.fontWeight = '600';
+  e.currentTarget.style.transition = 'color 0.3s, font-weight 0.3s';
+  e.currentTarget.style.fontSize = 'fontSize: 16px';
+  e.currentTarget.style.cursor = 'pointer';
+};
 
 const disableHoverEffect = (e: any) => {
-  ( e.currentTarget ).style.fontWeight = 'unset';
-  ( e.currentTarget ).style.transition = 'unset';
-  ( e.currentTarget ).style.fontSize = 'unset';
-  ( e.currentTarget ).style.cursor = 'unset';
-}
+  e.currentTarget.style.fontWeight = 'unset';
+  e.currentTarget.style.transition = 'unset';
+  e.currentTarget.style.fontSize = 'unset';
+  e.currentTarget.style.cursor = 'unset';
+};
 
 function UserHeader() {
   const { user } = useAppContext();
@@ -62,15 +62,11 @@ function UserHeader() {
             const linkStyle: React.CSSProperties = {
               fontWeight: isHovered ? '600' : undefined,
               transition: 'color 0.3s, font-weight 0.3s, text-decoration 0.3s',
-              fontSize: '16px' 
+              fontSize: '16px',
             };
 
             return (
-              <Link
-                key={route.href}
-                href={route.href}
-                className="font-display text-xl"
-              >
+              <Link key={route.href} href={route.href} className="font-display text-xl">
                 <p
                   style={linkStyle}
                   onMouseEnter={() => handleMouseEnter(route.href)}
@@ -98,16 +94,19 @@ function UserHeader() {
                   <Link href={'/profile'}>
                     {
                       <p
-                      onMouseLeave={(e)=>{
-                        ( e.currentTarget as HTMLTableCellElement ).style.fontWeight = 'unset';
-                        ( e.currentTarget as HTMLTableCellElement ).style.transition = 'unset';
-                        ( e.currentTarget as HTMLTableCellElement ).style.fontSize = 'unset';
-                      }}
-                      onMouseEnter={(e)=>{
-                        ( e.currentTarget as HTMLTableCellElement ).style.fontWeight = '600';
-                        ( e.currentTarget as HTMLTableCellElement ).style.transition = 'color 0.3s, font-weight 0.3s';
-                        ( e.currentTarget as HTMLTableCellElement ).style.fontSize = 'fontSize: 16px';
-                      }}>Thông tin cá nhân</p>
+                        onMouseLeave={(e) => {
+                          (e.currentTarget as HTMLTableCellElement).style.fontWeight = 'unset';
+                          (e.currentTarget as HTMLTableCellElement).style.transition = 'unset';
+                          (e.currentTarget as HTMLTableCellElement).style.fontSize = 'unset';
+                        }}
+                        onMouseEnter={(e) => {
+                          (e.currentTarget as HTMLTableCellElement).style.fontWeight = '600';
+                          (e.currentTarget as HTMLTableCellElement).style.transition = 'color 0.3s, font-weight 0.3s';
+                          (e.currentTarget as HTMLTableCellElement).style.fontSize = 'fontSize: 16px';
+                        }}
+                      >
+                        Thông tin cá nhân
+                      </p>
                     }
                   </Link>
                 </DropdownMenuItem>
@@ -125,7 +124,7 @@ function UserHeader() {
               const buttonStyle: React.CSSProperties = {
                 fontWeight: isHovered ? '600' : undefined,
                 transition: 'color 0.3s, font-weight 0.3s, text-decoration 0.3s',
-                fontSize: '16px'
+                fontSize: '16px',
               };
 
               const buttonText = href === '/login' ? 'Đăng nhập' : 'Đăng ký';
@@ -149,11 +148,10 @@ function UserHeader() {
   );
 }
 
-
 const adminRoutes = [
   { name: 'Logo', href: '/' },
-  { name: 'Cuộc thi', href: '/tournaments' }
-]
+  { name: 'Cuộc thi', href: '/tournaments' },
+];
 
 function AdminHeader() {
   const { user } = useAppContext();
@@ -176,15 +174,11 @@ function AdminHeader() {
             const linkStyle: React.CSSProperties = {
               fontWeight: isHovered ? '600' : undefined,
               transition: 'color 0.3s, font-weight 0.3s, text-decoration 0.3s',
-              fontSize: '16px' 
+              fontSize: '16px',
             };
 
             return (
-              <Link
-                key={route.href}
-                href={route.href}
-                className="font-display text-xl"
-              >
+              <Link key={route.href} href={route.href} className="font-display text-xl">
                 <p
                   style={linkStyle}
                   onMouseEnter={() => handleMouseEnter(route.href)}
@@ -196,29 +190,30 @@ function AdminHeader() {
             );
           })}
           <DropdownMenu>
-            <DropdownMenuTrigger style={{display: 'flex', alignItems: 'center'}} asChild>
-                  <p
-                    onMouseLeave={(e)=>{
-                      ( e.currentTarget ).style.fontWeight = 'unset';
-                      ( e.currentTarget ).style.transition = 'unset';
-                      ( e.currentTarget ).style.fontSize = 'unset';
-                      ( e.currentTarget ).style.cursor = 'unset';
-                    }}
-                    onMouseEnter={(e)=>{
-                      ( e.currentTarget ).style.fontWeight = '600';
-                      ( e.currentTarget ).style.transition = 'color 0.3s, font-weight 0.3s';
-                      ( e.currentTarget ).style.fontSize = 'fontSize: 16px';
-                      ( e.currentTarget ).style.cursor = 'pointer';
-                    }}>Quản lý</p>
+            <DropdownMenuTrigger style={{ display: 'flex', alignItems: 'center' }} asChild>
+              <p
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.fontWeight = 'unset';
+                  e.currentTarget.style.transition = 'unset';
+                  e.currentTarget.style.fontSize = 'unset';
+                  e.currentTarget.style.cursor = 'unset';
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.fontWeight = '600';
+                  e.currentTarget.style.transition = 'color 0.3s, font-weight 0.3s';
+                  e.currentTarget.style.fontSize = 'fontSize: 16px';
+                  e.currentTarget.style.cursor = 'pointer';
+                }}
+              >
+                Quản lý
+              </p>
             </DropdownMenuTrigger>
             <DropdownMenuContent className="w-56">
               <DropdownMenuGroup>
                 <DropdownMenuItem>
                   <Link href={'/testcase/'}>
                     {
-                      <p
-                        onMouseLeave={(e)=>disableHoverEffect(e)}
-                        onMouseEnter={(e)=>enableHoverEffect(e)}>
+                      <p onMouseLeave={(e) => disableHoverEffect(e)} onMouseEnter={(e) => enableHoverEffect(e)}>
                         Test case
                       </p>
                     }
@@ -227,18 +222,18 @@ function AdminHeader() {
                 <DropdownMenuItem>
                   <Link href={'/problem/'}>
                     {
-                      <p
-                      onMouseLeave={(e)=>disableHoverEffect(e)}
-                      onMouseEnter={(e)=>enableHoverEffect(e)}>Bài tập</p>
+                      <p onMouseLeave={(e) => disableHoverEffect(e)} onMouseEnter={(e) => enableHoverEffect(e)}>
+                        Bài tập
+                      </p>
                     }
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem>
                   <Link href={'/submission/'}>
                     {
-                      <p
-                      onMouseLeave={(e)=>disableHoverEffect(e)}
-                      onMouseEnter={(e)=>enableHoverEffect(e)}>Các bài nộp</p>
+                      <p onMouseLeave={(e) => disableHoverEffect(e)} onMouseEnter={(e) => enableHoverEffect(e)}>
+                        Các bài nộp
+                      </p>
                     }
                   </Link>
                 </DropdownMenuItem>
@@ -261,9 +256,9 @@ function AdminHeader() {
                   <User className="mr-2 h-4 w-4" />
                   <Link href={'/profile'}>
                     {
-                      <p
-                      onMouseLeave={(e)=>disableHoverEffect(e)}
-                      onMouseEnter={(e)=>enableHoverEffect(e)}>Thông tin cá nhân</p>
+                      <p onMouseLeave={(e) => disableHoverEffect(e)} onMouseEnter={(e) => enableHoverEffect(e)}>
+                        Thông tin cá nhân
+                      </p>
                     }
                   </Link>
                 </DropdownMenuItem>
@@ -280,9 +275,9 @@ function AdminHeader() {
               const isHovered = hoverStates[href] || false;
               const buttonStyle: React.CSSProperties = {
                 fontWeight: isHovered ? '600' : undefined,
-                cursor: isHovered ? 'pointer': 'unset',
+                cursor: isHovered ? 'pointer' : 'unset',
                 transition: 'color 0.3s, font-weight 0.3s, text-decoration 0.3s',
-                fontSize: '16px'
+                fontSize: '16px',
               };
 
               const buttonText = href === '/login' ? 'Đăng nhập' : 'Đăng ký';
@@ -303,5 +298,5 @@ function AdminHeader() {
         )}
       </div>
     </header>
-  )
+  );
 }

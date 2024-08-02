@@ -1,8 +1,10 @@
+'use client';
+
 import { DataTable } from '@/components/table/generaltable';
 import { submitColumns, Submit } from '@/components/submit/submitColumns';
 import React from 'react';
 
-async function getTestCaseData(): Promise<Submit[]> {
+function getTestCaseData(): Submit[] {
   return [
     {
       id: '1',
@@ -37,8 +39,8 @@ const ListItem = ({ text, active }: any) => (
   </div>
 );
 
-export default async function SubmitPage() {
-  const data = await getTestCaseData();
+export default function SubmitPage() {
+  const data = getTestCaseData();
   const items = [
     { id: 1, text: 'Bài 1: Đoán số', active: true },
     { id: 2, text: 'Bài 2: Bài toán phụ', active: false },
