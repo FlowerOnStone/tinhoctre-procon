@@ -15,27 +15,25 @@ export default async function TournamentsPage({ searchParams }: { searchParams: 
   }
 
   return (
-    <div style={{margin: '0px 50px'}}>
-      <div className="flex w-full gap-10">
-        <div className="flex-[7] flex flex-col gap-5">
-          {filteredTournaments.length !== 0 ? (
-            filteredTournaments.map((tournament) => (
-              <Link key={tournament.id} href={`/tournaments/${tournament.id}`}>
-                <Card>
-                  <CardHeader>
-                    <CardTitle>{tournament.name}</CardTitle>
-                    <CardDescription>Mô tả</CardDescription>
-                  </CardHeader>
-                </Card>
-              </Link>
-            ))
-          ) : (
-            <p> Không có cuộc thi nào. </p>
-          )}
-        </div>
-        <div className="flex-[3]">
-          <TournamentSearch />
-        </div>
+    <div className="flex w-full gap-10">
+      <div className="flex-[7] flex flex-col gap-5">
+        {filteredTournaments.length !== 0 ? (
+          filteredTournaments.map((tournament) => (
+            <Link key={tournament.id} href={`/tournaments/${tournament.id}`}>
+              <Card>
+                <CardHeader>
+                  <CardTitle>{tournament.name}</CardTitle>
+                  <CardDescription>Mô tả</CardDescription>
+                </CardHeader>
+              </Card>
+            </Link>
+          ))
+        ) : (
+          <p> Không có cuộc thi nào. </p>
+        )}
+      </div>
+      <div className="flex-[3]">
+        <TournamentSearch />
       </div>
     </div>
   );

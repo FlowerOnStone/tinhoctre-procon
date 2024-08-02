@@ -2,21 +2,23 @@
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import TournamentBracket from '@/components/bracket/page';
-import GeneralTournamentPage from '@/components/tournament/general/page';
+// import GeneralTournamentPage from '@/components/tournament/general/page';
 import SubmitPage from '@/app/submit/page';
-import ParticipantsPage from '@/components/tournament/participants/participants';
+import Participants from '@/components/tournament/participants/participants';
 import Problems from '@/components/tournament/problems/problems';
 import tournamentApiRequest from '@/api/tournament';
 import { useEffect, useState } from 'react';
 import { DetailTournamentResType } from '@/schema/tournament';
+import Groups from '@/components/tournament/groups/groups';
 
 export default function TournamentDetailPage({ params }: { params: { id: string } }) {
   const [tournament, setTournament] = useState<DetailTournamentResType['tournament'] | null>(null);
+
   useEffect(() => {
     const fetchRequest = async () => {
       try {
-        const res = await tournamentApiRequest.getDetailTournament(params.id);
-        setTournament(res.tournament);
+        const tournamentRes = await tournamentApiRequest.getDetailTournament(params.id);
+        setTournament(tournamentRes.tournament);
       } catch (error) {
         alert('Failed to fetch tournament detail');
       }
@@ -66,13 +68,13 @@ export default function TournamentDetailPage({ params }: { params: { id: string 
           </TabsTrigger>
         </TabsList>
         <TabsContent value="problems">
-          <Problems />
+          <Problems id={params.id} />
         </TabsContent>
         <TabsContent value="participants">
-          <ParticipantsPage />
+          <Participants />
         </TabsContent>
         <TabsContent value="group">
-          <GeneralTournamentPage />
+          <Groups id={params.id} />
         </TabsContent>
         <TabsContent value="bracket">
           <TournamentBracket />
