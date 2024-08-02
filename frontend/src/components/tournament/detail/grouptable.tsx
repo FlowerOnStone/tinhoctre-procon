@@ -37,9 +37,9 @@ async function getData(): Promise<Group[]> {
     return (
     <div>
         <h2 style={{ textAlign: 'center' }}>
-        <Link href={groupRoute} style={{fontSize: 24, fontWeight: 'bold'}}>
+        <p style={{fontSize: 24, fontWeight: 'bold'}}>
             Bảng A
-        </Link>
+        </p>
         </h2>
         <DataTable data={data} columns={columns} show={false} />
     </div>
