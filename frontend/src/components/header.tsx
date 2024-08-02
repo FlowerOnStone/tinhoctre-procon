@@ -14,6 +14,7 @@ import {
 } from './ui/dropdown-menu';
 import { Button } from './ui/button';
 import { LogOut, User } from 'lucide-react';
+import { Logout } from '@/app/(auth)/logout/logout';
 
 const routes = [
   { name: 'Logo', href: '/' },
@@ -74,11 +75,25 @@ export default function Header() {
               <DropdownMenuGroup>
                 <DropdownMenuItem>
                   <User className="mr-2 h-4 w-4" />
-                  <span>Profile</span>
+                  <Link href={'/profile'}>
+                    {
+                      <p
+                      onMouseLeave={(e)=>{
+                        ( e.currentTarget as HTMLTableCellElement ).style.fontWeight = 'unset';
+                        ( e.currentTarget as HTMLTableCellElement ).style.transition = 'unset';
+                        ( e.currentTarget as HTMLTableCellElement ).style.fontSize = 'unset';
+                      }}
+                      onMouseEnter={(e)=>{
+                        ( e.currentTarget as HTMLTableCellElement ).style.fontWeight = '600';
+                        ( e.currentTarget as HTMLTableCellElement ).style.transition = 'color 0.3s, font-weight 0.3s';
+                        ( e.currentTarget as HTMLTableCellElement ).style.fontSize = 'fontSize: 16px';
+                      }}>Thông tin cá nhân</p>
+                    }
+                  </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem>
                   <LogOut className="mr-2 h-4 w-4" />
-                  <span>Log out</span>
+                  <Logout></Logout>
                 </DropdownMenuItem>
               </DropdownMenuGroup>
             </DropdownMenuContent>

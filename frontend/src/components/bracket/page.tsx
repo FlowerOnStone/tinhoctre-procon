@@ -281,6 +281,7 @@ const TournamentBracket: React.FC = () => {
   return (
     <div>
       <h1 className="text-3xl mb-4 mt-8 font-bold">Vòng loại trực tiếp</h1>
+      <div style={{backgroundColor: '#f1f5f9', padding: '30px 30px'}}>
       <table style={{ width: "100%", borderCollapse: "collapse" }}>
         <tbody>
           {rows.map((_, rowIndex) => (
@@ -323,6 +324,7 @@ const TournamentBracket: React.FC = () => {
           ))}
         </tbody>
       </table>
+      </div>
     </div>
   );
 };

@@ -33,8 +33,8 @@ export default function Register({ timezones, programmingLanguages }: RegisterPr
       email: '',
       first_name: '',
       last_name: '',
-      preferred_language: 11,
-      timezone: 1,
+      preferred_language: 1,
+      timezone: timezones.find((timezone) => timezone.location === 'Ho_Chi_Minh')?.id || timezones[0].id,
     },
   });
 

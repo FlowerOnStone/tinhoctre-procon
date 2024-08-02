@@ -18,7 +18,7 @@ const request = async <Response>(
   if (options?.body instanceof FormData) {
     body = options.body;
   } else if (options?.body) {
-    body = JSON.stringify(options.body);
+    body = JSON.stringify(options?.body);
   }
   const baseHeaders: {
     [key: string]: string;
@@ -30,7 +30,7 @@ const request = async <Response>(
         };
   if (isClient()) {
     const token = localStorage.getItem('token');
-    if (token !== 'undefined') {
+    if (token !== 'undefined' && token !== undefined && token != null) {
       baseHeaders.Authorization = `token ${token}`;
     }
   }
@@ -48,8 +48,14 @@ const request = async <Response>(
     body,
     method,
   });
-
-  const data: Response = await res.json();
+  
+  const contentType = res.headers.get('Content-Type');
+  let data: Response;
+  if (contentType && contentType.includes('application/json')) {
+    data = await res.json();
+  } else {
+    data = await res.text() as unknown as Response;
+  }
 
   // Interceptor
   if (!res.ok) {
@@ -58,11 +64,13 @@ const request = async <Response>(
     }
   }
 
+  
+
   if (isClient()) {
     if (['api/login/', 'api/register/'].some((item) => item === normalizePath(url))) {
       const { token } = data as LoginResType;
       localStorage.setItem('token', token);
-    } else if ('auth/logout' === normalizePath(url)) {
+    } else if ('api/logout/' === normalizePath(url)) {
       localStorage.removeItem('token');
     }
   }
