@@ -1,39 +1,25 @@
 'use client';
 
-import { DataTable } from '@/components/table/generaltable';
-import { ColumnDef } from '@tanstack/react-table';
-import React from 'react';
+import { DataTable } from '@/components/table/general-table';
+import { useEffect, useState } from 'react';
+import { problemColumns } from './problemColumns';
+import { ProblemType } from '@/schema/problem';
+import tournamentApiRequest from '@/api/tournament';
 
-const data = [
-  { id: 1, name: 'Dãy số', points: 100 },
-  { id: 2, name: 'Tam giác', points: 100 },
-  { id: 3, name: 'Hàng cây', points: 100 },
-];
+export default function Problems({ id }: { id: string }) {
+  const [problems, setProblems] = useState<ProblemType | null>(null);
 
-type Problem = {
-  id: number;
-  name: string;
-  points: number;
-};
-
-const columns: ColumnDef<Problem>[] = [
-  {
-    accessorKey: 'id',
-    header: 'ID',
-    cell: ({ row }) => <div>{row.getValue('id')}</div>,
-  },
-  {
-    accessorKey: 'name',
-    header: 'Problem',
-    cell: ({ row }) => <div>{row.getValue('name')}</div>,
-  },
-  {
-    accessorKey: 'points',
-    header: 'Points',
-    cell: ({ row }) => <div>{row.getValue('points')}</div>,
-  },
-];
-
-export default function Problems() {
-  return <DataTable show={false} data={data} columns={columns}></DataTable>;
+  useEffect(() => {
+    const fetchRequest = async () => {
+      try {
+        const problemsRes = await tournamentApiRequest.getProblemsByTournament(id);
+        setProblems(problemsRes.problem);
+      } catch (error) {
+        alert('Failed to fetch tournament detail');
+      }
+    };
+    fetchRequest();
+  }, [id]);
+  const data = problems ? [problems] : [];
+  return <DataTable data={data} columns={problemColumns} problemsTable />;
 }

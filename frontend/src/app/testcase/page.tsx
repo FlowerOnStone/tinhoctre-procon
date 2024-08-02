@@ -1,4 +1,4 @@
-import { DataTable } from '@/components/table/generaltable';
+import { DataTable } from '@/components/table/general-table';
 import { columnsTestCase, TestCase } from '@/components/testcase/testcase';
 import TestCaseEditor from '@/components/testcase/testcaseeditor';
 import { Button } from '@/components/ui/button';
@@ -47,7 +47,7 @@ async function getTestCaseData(): Promise<TestCase[]> {
 export default async function TestCasePage() {
   const data = await getTestCaseData();
   return (
-    <div style={{margin: '0px 50px'}}>
+    <div style={{ margin: '0px 50px' }}>
       <div className="mx-auto max-w-screen-2xl w-full mb-6">
         <h1 className="text-3xl mb-4 mt-8 font-bold">Quản lý Test Case</h1>
         <TestCaseEditor />

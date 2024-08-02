@@ -9,9 +9,9 @@ interface LanguagesDropdownProps {
 
 const LanguagesDropdown = ({ onSelectChange, programmingLanguages }: LanguagesDropdownProps) => {
   return (
-    <Select onValueChange={onSelectChange}>
+    <Select onValueChange={onSelectChange} defaultValue={programmingLanguages[0].id.toString()}>
       <SelectTrigger className="w-[180px]">
-        <SelectValue placeholder={`Filter By Category`} />
+        <SelectValue />
       </SelectTrigger>
       <SelectContent>
         <SelectGroup>

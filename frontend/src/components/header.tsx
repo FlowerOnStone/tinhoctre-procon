@@ -2,7 +2,7 @@
 
 import { useAppContext } from '@/app/app-provider';
 import Link from 'next/link';
-import React, { useState } from 'react';
+import React from 'react';
 import {
   DropdownMenu,
   DropdownMenuContent,

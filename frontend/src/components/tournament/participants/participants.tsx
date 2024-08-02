@@ -1,8 +1,8 @@
-import { DataTable } from '@/components/table/generaltable';
+import { DataTable } from '@/components/table/general-table';
 import React from 'react';
 import { participantColumns } from './participantColumns';
 
-export default function ParticipantsPage() {
+export default function Participants() {
   const data = [
     {
       id: '1',
@@ -33,6 +33,8 @@ export default function ParticipantsPage() {
       problemsCount: 7,
     },
   ];
+
+  console.log(participantColumns);
 
   return <DataTable show={false} data={data} columns={participantColumns}></DataTable>;
 }

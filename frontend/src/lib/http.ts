@@ -60,7 +60,6 @@ const request = async <Response>(
   // Interceptor
   if (!res.ok) {
     if (res.status === AUTHENTICATION_ERROR_STATUS) {
-      // logout
     }
   }
 
