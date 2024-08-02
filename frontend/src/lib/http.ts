@@ -30,7 +30,7 @@ const request = async <Response>(
         };
   if (isClient()) {
     const token = localStorage.getItem('token');
-    if (token) {
+    if (token !== 'undefined' && token !== undefined && token != null) {
       baseHeaders.Authorization = `token ${token}`;
     }
   }
@@ -49,8 +49,6 @@ const request = async <Response>(
     method,
   });
 
-  const data: Response = await res.json();
-
   // Interceptor
   if (!res.ok) {
     if (res.status === AUTHENTICATION_ERROR_STATUS) {
@@ -58,11 +56,17 @@ const request = async <Response>(
     }
   }
 
+  if (res.status === 204) {
+    throw new Error('No content');
+  }
+
+  const data: Response = await res.json();
+
   if (isClient()) {
     if (['api/login/', 'api/register/'].some((item) => item === normalizePath(url))) {
       const { token } = data as LoginResType;
       localStorage.setItem('token', token);
-    } else if ('auth/logout' === normalizePath(url)) {
+    } else if ('api/logout/' === normalizePath(url)) {
       localStorage.removeItem('token');
     }
   }

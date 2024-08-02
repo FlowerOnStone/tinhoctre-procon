@@ -8,6 +8,8 @@ const userApiRequest = {
     http.post('/api/auth', body, {
       baseUrl: '',
     }),
+
+  logout: () => http.post('/api/logout/', {}),
 };
 
 export default userApiRequest;

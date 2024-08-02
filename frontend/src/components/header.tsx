@@ -14,6 +14,8 @@ import {
 } from './ui/dropdown-menu';
 import { Button } from './ui/button';
 import { LogOut, User } from 'lucide-react';
+import userApiRequest from '@/api/user';
+import { useRouter } from 'next/navigation';
 
 const routes = [
   { name: 'Logo', href: '/' },
@@ -21,7 +23,23 @@ const routes = [
 ];
 
 export default function Header() {
-  const { user } = useAppContext();
+  const { user, setUser } = useAppContext();
+  const router = useRouter();
+
+  async function handleLogout() {
+    console.log('logout');
+    try {
+      await userApiRequest.logout().then(() => {
+        console.log('logout success');
+      });
+      router.push('/');
+      router.refresh();
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setUser(null);
+    }
+  }
 
   return (
     <header className={`fixed top-0 w-full flex justify-center bg-[#15518B] z-30 transition-all text-white`}>
@@ -48,7 +66,7 @@ export default function Header() {
                   <User className="mr-2 h-4 w-4" />
                   <span>Profile</span>
                 </DropdownMenuItem>
-                <DropdownMenuItem>
+                <DropdownMenuItem onClick={handleLogout}>
                   <LogOut className="mr-2 h-4 w-4" />
                   <span>Log out</span>
                 </DropdownMenuItem>
