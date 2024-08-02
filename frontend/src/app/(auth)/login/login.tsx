@@ -26,11 +26,10 @@ export default function Login() {
 
   // 2. Define a submit handler.
   async function onSubmit(values: LoginBodyType) {
-    console.log(values);
+    // console.log(values);
 
     try {
       const response = await userApiRequest.login(values);
-
       await userApiRequest.auth({ token: response.token });
 
       setUser(response.user);

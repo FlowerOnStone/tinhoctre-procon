@@ -47,18 +47,20 @@ async function getTestCaseData(): Promise<TestCase[]> {
 export default async function TestCasePage() {
   const data = await getTestCaseData();
   return (
-    <div className="mx-auto max-w-screen-2xl w-full mb-6">
-      <h1 className="text-3xl mb-4 mt-8 font-bold">Quản lý Test Case</h1>
-      <TestCaseEditor />
-      <Button variant={'login'} className="mt-4 mb-10 rounded-none">
-        Thêm
-      </Button>
+    <div style={{margin: '0px 50px'}}>
+      <div className="mx-auto max-w-screen-2xl w-full mb-6">
+        <h1 className="text-3xl mb-4 mt-8 font-bold">Quản lý Test Case</h1>
+        <TestCaseEditor />
+        <Button variant={'login'} className="mt-4 mb-10 rounded-none">
+          Thêm
+        </Button>
 
-      <DataTable data={data} columns={columnsTestCase}></DataTable>
+        <DataTable data={data} columns={columnsTestCase}></DataTable>
 
-      <Button variant={'login'} className="mt-4 mb-10 rounded-none">
-        Áp dụng
-      </Button>
+        <Button variant={'login'} className="mt-4 mb-10 rounded-none">
+          Áp dụng
+        </Button>
+      </div>
     </div>
   );
 }

@@ -68,10 +68,12 @@ const request = async <Response>(
 
   if (isClient()) {
     if (['api/login/', 'api/register/'].some((item) => item === normalizePath(url))) {
-      const { token } = data as LoginResType;
+      const { token, is_admin } = data as LoginResType;
       localStorage.setItem('token', token);
+      localStorage.setItem('role', is_admin ? 'admin' : 'user');
     } else if ('api/logout/' === normalizePath(url)) {
       localStorage.removeItem('token');
+      localStorage.removeItem('role');
     }
   }
 

@@ -60,7 +60,7 @@ export default async function GeneralTournamentPage() {
       </div>
 
       <div style={{ display: 'flex', justifyContent: 'space-around', marginBottom: '5%'}}>
-        <div style={{ width: '45%' }}>
+        <div style={{ width: '47.5%' }}>
           <h2 style={{ textAlign: 'center' }}>
             <Link href={groupRoute} style={{fontSize: 24, fontWeight: 'bold'}}>
               Bảng A
@@ -69,7 +69,7 @@ export default async function GeneralTournamentPage() {
           <DataTable data={data} columns={columns} show={false} />
         </div>
 
-        <div style={{ width: '45%' }}>
+        <div style={{ width: '47.5%' }}>
           <h2 style={{ textAlign: 'center' }}>
             <Link href={groupRoute} style={{fontSize: 24, fontWeight: 'bold'}}>
               Bảng B
@@ -80,7 +80,7 @@ export default async function GeneralTournamentPage() {
       </div>
 
       <div style={{ display: 'flex', justifyContent: 'space-around', marginBottom: '5%'}}>
-        <div style={{ width: '45%' }}>
+        <div style={{ width: '47.5%' }}>
           <h2 style={{ textAlign: 'center' }}>
             <Link href={groupRoute} style={{fontSize: 24, fontWeight: 'bold'}}>
               Bảng A
@@ -89,7 +89,7 @@ export default async function GeneralTournamentPage() {
           <DataTable data={data} columns={columns} show={false} />
         </div>
 
-        <div style={{ width: '45%' }}>
+        <div style={{ width: '47.5%' }}>
           <h2 style={{ textAlign: 'center' }}>
             <Link href={groupRoute} style={{fontSize: 24, fontWeight: 'bold'}}>
               Bảng B
@@ -100,7 +100,7 @@ export default async function GeneralTournamentPage() {
       </div>
 
       <div style={{ display: 'flex', justifyContent: 'space-around', marginBottom: '5%'}}>
-        <div style={{ width: '45%' }}>
+        <div style={{ width: '47.5%' }}>
           <h2 style={{ textAlign: 'center' }}>
             <Link href={groupRoute} style={{fontSize: 24, fontWeight: 'bold'}}>
               Bảng A
@@ -109,7 +109,7 @@ export default async function GeneralTournamentPage() {
           <DataTable data={data} columns={columns} show={false} />
         </div>
 
-        <div style={{ width: '45%' }}>
+        <div style={{ width: '47.5%' }}>
           <h2 style={{ textAlign: 'center' }}>
             <Link href={groupRoute} style={{fontSize: 24, fontWeight: 'bold'}}>
               Bảng B
