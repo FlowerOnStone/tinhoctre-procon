@@ -2,11 +2,22 @@ from .models import *
 from .serializers import *
 
 
+def log_2(x):
+    cnt = 0
+    while x != 1:
+        if x % 2 != 0:
+            return -1
+        x //= 2
+        cnt += 1
+    return cnt
+
+
 def get_last_submission(user: User, problem: Problem) -> Submission:
     submissions = Submission.objects.filter(user=user, problem=problem).order_by("-id")
-    if len(submissions) == 0:
-        return None
-    return submissions[0]
+    for submission in submissions:
+        if submission.status == SubmissionStatus.COMPILE_SUCCESS:
+            return submission
+    return None
 
 
 def create_round(
@@ -67,7 +78,7 @@ def group_summary(group: Group) -> dict:
             result[round.second_user.username]["point"] += 1
     result = [result[participant] for participant in result]
     result.sort(key=point, reverse=True)
-    result = {participant["username"]: participant for participant in result}
+    result = {index: result[index] for index in range (len(result))}
     return result
 
 

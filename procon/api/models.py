@@ -11,7 +11,7 @@ class ProgramLanguage(models.Model):
         return self.name
 
     name = models.CharField(max_length=16)
-    compile_args = models.CharField(max_length=64)
+    compile_args = models.CharField(max_length=128)
     extension = models.CharField(max_length=3)
 
 
@@ -125,16 +125,8 @@ class LanguageSpecificTemplates(models.Model):
 
 
 class SubmissionStatus(models.TextChoices):
-    ACCEPTED = "AC"
-    WRONG_ANSWER = "WA"
-    RUNTIME_EXCEPTION = "RTE"
-    INVALID_RETURN = "IR"
-    OUTPUT_LIMIT_EXCEEDED = "OLE"
-    MEMORY_LIMIT_EXCEEDED = "MLE"
-    TIME_LIMIT_EXCEEDED = "TLE"
-    INTERNAL_ERROR = "IE"
     COMPILE_ERROR = "CE"
-    ABORTED = "AB"
+    COMPILE_SUCCESS = "CS"
     IN_QUEUE = "QU"
     PROCESSING = "PR"
 
@@ -151,13 +143,11 @@ class Submission(models.Model):
     language = models.ForeignKey(
         ProgramLanguage, on_delete=models.DO_NOTHING, blank=False, null=True
     )
-    code = models.CharField(max_length=65536)
+    source = models.CharField(max_length=65536)
     status = models.CharField(
         max_length=3, choices=SubmissionStatus.choices, default="QU"
     )
-    total_point = models.IntegerField(default=0)
-    time = models.IntegerField(default=0)
-    memory = models.IntegerField(default=0)
+    log = models.CharField(max_length=1024, null=True, blank=True)
 
 
 class DefaultSubmission(models.Model):
@@ -271,6 +261,7 @@ class Match(models.Model):
         PROCESSING = "P"
 
     round = models.ForeignKey(Round, on_delete=models.CASCADE, blank=False, null=False)
+    type = models.IntegerField(default=1)
     testcase = models.IntegerField()
     status = models.CharField(max_length=1, choices=MatchStatus.choices, default="Q")
     history = models.JSONField()
