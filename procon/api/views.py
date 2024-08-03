@@ -52,12 +52,12 @@ class RegisterAPI(generics.GenericAPIView):
             user=user, timezone=timezone, preferred_language=preferred_language
         )
         user_profile.save()
-
+        user_data = UserSerializer(user).data 
+        user_data["is_admin"] = user.is_superuser
+        user_data["preferred_language"] = ProgramLanguageSerializer(user_profile.preferred_language).data
         return Response(
             {
-                "user": UserSerializer(
-                    user, context=self.get_serializer_context()
-                ).data,
+                "user": user_data,
                 "token": AuthToken.objects.create(user)[1],
             }
         )
@@ -137,12 +137,13 @@ class LoginAPI(generics.GenericAPIView):
         user = serializer.validated_data
         user_data = UserSerializer(user, context=self.get_serializer_context()).data
         user_data["is_admin"] = user.is_superuser
+        user_profile = UserProfile.objects.get(user=user)
+        user_data["preferred_language"] = ProgramLanguageSerializer(user_profile.preferred_language).data
         return Response(
             {
                 "user": user_data,
-                "token": AuthToken.objects.create(user)[1],
-                "is_admin": user.is_superuser,
-            }
+                "token": AuthToken.objects.create(user)[1]
+            }, status=status.HTTP_200_OK
         )
 
 class ListCreateProblemAPI(generics.ListCreateAPIView):
