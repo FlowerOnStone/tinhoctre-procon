@@ -78,7 +78,7 @@ def group_summary(group: Group) -> dict:
             result[round.second_user.username]["point"] += 1
     result = [result[participant] for participant in result]
     result.sort(key=point, reverse=True)
-    result = {participant["username"]: participant for participant in result}
+    result = {index: result[index] for index in range (len(result))}
     return result
 
 
