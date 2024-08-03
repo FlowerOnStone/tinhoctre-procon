@@ -52,9 +52,11 @@ class RegisterAPI(generics.GenericAPIView):
             user=user, timezone=timezone, preferred_language=preferred_language
         )
         user_profile.save()
-        user_data = UserSerializer(user).data 
+        user_data = UserSerializer(user).data
         user_data["is_admin"] = user.is_superuser
-        user_data["preferred_language"] = ProgramLanguageSerializer(user_profile.preferred_language).data
+        user_data["preferred_language"] = ProgramLanguageSerializer(
+            user_profile.preferred_language
+        ).data
         return Response(
             {
                 "user": user_data,
@@ -138,13 +140,14 @@ class LoginAPI(generics.GenericAPIView):
         user_data = UserSerializer(user, context=self.get_serializer_context()).data
         user_data["is_admin"] = user.is_superuser
         user_profile = UserProfile.objects.get(user=user)
-        user_data["preferred_language"] = ProgramLanguageSerializer(user_profile.preferred_language).data
+        user_data["preferred_language"] = ProgramLanguageSerializer(
+            user_profile.preferred_language
+        ).data
         return Response(
-            {
-                "user": user_data,
-                "token": AuthToken.objects.create(user)[1]
-            }, status=status.HTTP_200_OK
+            {"user": user_data, "token": AuthToken.objects.create(user)[1]},
+            status=status.HTTP_200_OK,
         )
+
 
 class ListCreateProblemAPI(generics.ListCreateAPIView):
     model = Problem
@@ -508,33 +511,49 @@ class ListCreateTournamentGroupAPI(generics.ListCreateAPIView):
                 )
         return group
 
-    def create_tournament_table(self, id, level, left, right, bracket_seed, num_match):
-        if level == 0:
-            return {
-                "id": id,
-                "type": "leaf",
-                "left": bracket_seed[left],
-                "right": bracket_seed[right],
-                "num_match": num_match[level],
-                "round": "N/A",
+    def create_tournament_table(
+        self, nodes, level, left, right, bracket_seed, num_match
+    ):
+        if right - left == 1:
+            self.cnt += 1
+            nodes[str(self.cnt)] = {
+                "parent": -1,
+                "left_child": -1,
+                "right_child": -1,
+                "left_player": bracket_seed[left],
+                "right_player": bracket_seed[right],
+                "left_score": -1,
+                "right_score": -1,
+                "round": -1,
+                "knockout": 2 ** (level + 1),
             }
+            return self.cnt
         mid = (left + right) // 2
-        left_path = self.create_tournament_table(
-            id * 2, level - 1, left, mid, bracket_seed, num_match
-        )
-        right_path = self.create_tournament_table(
-            id * 2 + 1, level - 1, mid + 1, right, bracket_seed, num_match
-        )
-        return {
-            "id": id,
-            "type": "node",
-            "left": "N/A",
-            "right": "N/A",
-            "left_path": left_path,
-            "right_path": right_path,
-            "num_match": num_match[level],
-            "round": "N/A",
+        node = {
+            "parent": -1,
+            "left_child": -1,
+            "right_child": -1,
+            "left_player": "N/A",
+            "right_player": "N/A",
+            "left_score": -1,
+            "right_score": -1,
+            "round": -1,
+            "knockout": 2 ** (level + 1),
         }
+        left_node = self.create_tournament_table(
+            nodes, level + 1, left, mid, bracket_seed, num_match
+        )
+        self.cnt += 1
+        id = self.cnt
+        nodes[str(left_node)]["parent"] = id
+        node["left_child"] = left_node
+        nodes[str(id)] = node
+        right_node = self.create_tournament_table(
+            nodes, level + 1, mid + 1, right, bracket_seed, num_match
+        )
+        nodes[str(right_node)]["parent"] = id
+        node["right_child"] = right_node
+        return id
 
     def get(self, request, *args, **kwargs):
         tournament = Tournament.objects.get(id=kwargs.get("id"))
@@ -570,9 +589,6 @@ class ListCreateTournamentGroupAPI(generics.ListCreateAPIView):
         groups = request.data["groups"]
         num_matchs = request.data["num_matchs"]
         group_num_match = request.data["group_num_match"]
-        print(groups)
-        print(num_matchs)
-        print(group_num_match)
         if len(num_matchs) != log_2(tournament.num_group) + 1:
             return JsonResponse(
                 {"message": "Does not enough num_match"},
@@ -624,9 +640,16 @@ class ListCreateTournamentGroupAPI(generics.ListCreateAPIView):
             bracket_seed.append(str(groups[index + 1].id) + "_1")
             bracket_seed.append(str(groups[index].id) + "_2")
         num_matchs = [int(num_match) for num_match in num_matchs]
-        tournament.tournament_table = self.create_tournament_table(
-            1, len(num_matchs) - 1, 0, len(bracket_seed) - 1, bracket_seed, num_matchs
+        num_matchs.reverse()
+        nodes = dict()
+        self.cnt = 0
+        root = self.create_tournament_table(
+            nodes, 0, 0, len(bracket_seed) - 1, bracket_seed, num_matchs
         )
+        tournament.tournament_table = {
+            "root": root,
+            "nodes": nodes,
+        }
         tournament.save()
         return JsonResponse(
             {"message": "create tournament group"}, status=status.HTTP_201_CREATED
@@ -856,7 +879,7 @@ class RetrieveTournamentParticipantAPI(generics.RetrieveAPIView):
                 {"message": "you don't have permission to view problem of this group"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
-        user_serializer = UserSerializer(tournament.participants.all(), many = True)
+        user_serializer = UserSerializer(tournament.participants.all(), many=True)
         return JsonResponse(
             {"participants": user_serializer.data},
             status=status.HTTP_200_OK,
