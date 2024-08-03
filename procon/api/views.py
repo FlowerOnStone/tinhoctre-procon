@@ -527,6 +527,7 @@ class ListCreateTournamentGroupAPI(generics.ListCreateAPIView):
                 "right_player": bracket_seed[right],
                 "left_score": -1,
                 "right_score": -1,
+                "num_match": num_match[level],
                 "round": -1,
                 "knockout": 2 ** (level + 1),
             }
@@ -540,6 +541,7 @@ class ListCreateTournamentGroupAPI(generics.ListCreateAPIView):
             "right_player": "N/A",
             "left_score": -1,
             "right_score": -1,
+            "num_match": num_match[level],
             "round": -1,
             "knockout": 2 ** (level + 1),
         }
