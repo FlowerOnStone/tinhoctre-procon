@@ -65,12 +65,17 @@ urlpatterns = [
     ),
     path(
         "tournament/<int:id>/group/",
-        RetrieveTournamentGroupAPI.as_view(),
+        ListCreateTournamentGroupAPI.as_view(),
         name="view_tournament_group",
     ),
     path(
         "tournament/<int:id>/problem/",
         RetrieveTournamentProblemAPI.as_view(),
+        name="view_tournament_problem",
+    ),
+    path(
+        "tournament/<int:id>/participants/",
+        RetrieveTournamentParticipantAPI.as_view(),
         name="view_tournament_problem",
     ),
     path(
