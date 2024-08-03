@@ -79,11 +79,6 @@ urlpatterns = [
         name="view_tournament_problem",
     ),
     path(
-        "tournament/<int:id>/node/<int:node>/",
-        UpdateTournamentNodeAPI.as_view(),
-        name="update_tournament_node",
-    ),
-    path(
         "group/<int:id>/",
         RetrieveGroupAPI.as_view(),
         name="view_group",
