@@ -71,13 +71,13 @@ export default function TournamentDetailPage({ params }: { params: { id: string 
           <Problems id={params.id} />
         </TabsContent>
         <TabsContent value="participants">
-          <Participants />
+          <Participants id={params.id} />
         </TabsContent>
         <TabsContent value="group">
           <Groups id={params.id} />
         </TabsContent>
         <TabsContent value="bracket">
-          <TournamentBracket />
+          <TournamentBracket id={params.id} />
         </TabsContent>
         <TabsContent value="submission">
           <SubmitPage />

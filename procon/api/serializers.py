@@ -141,7 +141,7 @@ class CreateSubmissionSerializer(serializers.ModelSerializer):
             "user",
             "problem",
             "language",
-            "code",
+            "source",
         )
 
 
@@ -153,11 +153,9 @@ class SubmissionSerializer(serializers.ModelSerializer):
             "problem",
             "submission_time",
             "language",
-            "code",
+            "source",
             "status",
-            "total_point",
-            "time",
-            "memory",
+            "log",
         )
 
 
@@ -226,6 +224,7 @@ class MatchSerializer(serializers.ModelSerializer):
         fields = (
             "id",
             "round",
+            "type",
             "testcase",
             "status",
             "history",

@@ -19,9 +19,9 @@ export const Group = z.object({
   participants: z.array(z.number()),
   status: z.string(),
   summary: z.object({
-    user1: UserInGroup,
-    user2: UserInGroup,
-    user3: UserInGroup,
+    "0": UserInGroup,
+    "1": UserInGroup,
+    "2": UserInGroup,
   }),
 });
 
@@ -56,6 +56,25 @@ export const DetailGroupRes = z.object({
     status: z.string(),
   }),
   rounds: z.array(Round),
+  summary: z.object({
+    "0": UserInGroup,
+    "1": UserInGroup,
+    "2": UserInGroup,
+  }),
 });
 
 export type DetailGroupResType = z.infer<typeof DetailGroupRes>;
+
+export const Participant = z.object({
+  id: z.number(),
+  username: z.string(),
+  first_name: z.string(),
+})
+
+export const ParticipantRes = z.object({
+  participants: z.array(Participant)
+})
+
+export type ParticipantType = z.infer<typeof Participant>;
+
+export type ParticipantResType = z.infer<typeof ParticipantRes>;

@@ -2,11 +2,22 @@ from .models import *
 from .serializers import *
 
 
+def log_2(x):
+    cnt = 0
+    while x != 1:
+        if x % 2 != 0:
+            return -1
+        x //= 2
+        cnt += 1
+    return cnt
+
+
 def get_last_submission(user: User, problem: Problem) -> Submission:
     submissions = Submission.objects.filter(user=user, problem=problem).order_by("-id")
-    if len(submissions) == 0:
-        return None
-    return submissions[0]
+    for submission in submissions:
+        if submission.status == SubmissionStatus.COMPILE_SUCCESS:
+            return submission
+    return None
 
 
 def create_round(
@@ -67,18 +78,30 @@ def group_summary(group: Group) -> dict:
             result[round.second_user.username]["point"] += 1
     result = [result[participant] for participant in result]
     result.sort(key=point, reverse=True)
-    result = {participant["username"]: participant for participant in result}
+    result = {index: result[index] for index in range(len(result))}
     return result
 
 
 def serialize_bracket(bracket):
-    if bracket["left"] != "N/A" and not bracket["left"].find("_"):
-        bracket["left"] = User.objects.get(id=bracket["left"]).first_name
-    if bracket["right"] != "N/A" and not bracket["right"].find("_"):
-        bracket["right"] = User.objects.get(id=bracket["right"]).first_name
-    if bracket["round"] != "N/A":
-        bracket["round"] = RoundSerializer(Round.objects.get(id=bracket["round"])).data
-    if bracket["type"] == "leaf":
-        return None
-    serialize_bracket(bracket["left_path"])
-    serialize_bracket(bracket["right_path"])
+    def serialize_id(id):
+        if type(id) == str:
+            if id == "N/A":
+                return "N/A"
+            if id.find("_"):
+                tokens = id.split("_")
+                group = Group.objects.get(pk=int(tokens[0]))
+                group_id = chr(ord("A") + group.index - 1)
+                top = "Nhất"
+                if int(tokens[1]) == 2:
+                    top = "Nhì"
+                return f"{top} bảng {group_id}"
+        user = User.objects.get(pk=int(id))
+        return user.first_name
+
+    for id in bracket["nodes"]:
+        bracket["nodes"][id]["left_player"] = serialize_id(
+            bracket["nodes"][id]["left_player"]
+        )
+        bracket["nodes"][id]["right_player"] = serialize_id(
+            bracket["nodes"][id]["right_player"]
+        )

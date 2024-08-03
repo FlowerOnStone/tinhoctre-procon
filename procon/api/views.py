@@ -11,6 +11,7 @@ from datetime import datetime
 from django.utils import timezone
 from django.conf import settings
 from django.db.models import Q
+from .tasks import *
 
 
 class ListTimezoneAPI(generics.ListAPIView):
@@ -51,12 +52,14 @@ class RegisterAPI(generics.GenericAPIView):
             user=user, timezone=timezone, preferred_language=preferred_language
         )
         user_profile.save()
-
+        user_data = UserSerializer(user).data
+        user_data["is_admin"] = user.is_superuser
+        user_data["preferred_language"] = ProgramLanguageSerializer(
+            user_profile.preferred_language
+        ).data
         return Response(
             {
-                "user": UserSerializer(
-                    user, context=self.get_serializer_context()
-                ).data,
+                "user": user_data,
                 "token": AuthToken.objects.create(user)[1],
             }
         )
@@ -134,14 +137,17 @@ class LoginAPI(generics.GenericAPIView):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         user = serializer.validated_data
-
+        user_data = UserSerializer(user, context=self.get_serializer_context()).data
+        user_data["is_admin"] = user.is_superuser
+        user_profile = UserProfile.objects.get(user=user)
+        user_data["preferred_language"] = ProgramLanguageSerializer(
+            user_profile.preferred_language
+        ).data
         return Response(
-            {
-                "user": UserSerializer(user, context=self.get_serializer_context()).data,
-                "token": AuthToken.objects.create(user)[1],
-                "is_admin": user.is_superuser,
-            }
+            {"user": user_data, "token": AuthToken.objects.create(user)[1]},
+            status=status.HTTP_200_OK,
         )
+
 
 class ListCreateProblemAPI(generics.ListCreateAPIView):
     model = Problem
@@ -196,7 +202,7 @@ class RetrieveUpdateDestroyProblemAPI(generics.RetrieveUpdateDestroyAPIView):
             ):
                 return JsonResponse(
                     {"message": "You do not have permission to view this problem!"},
-                    status=status.HTTP_400_BAD_REQUEST,
+                    status=status.HTTP_403_FORBIDDEN,
                 )
 
         serializer = ProblemSerializer(problem)
@@ -210,7 +216,7 @@ class RetrieveUpdateDestroyProblemAPI(generics.RetrieveUpdateDestroyAPIView):
         ):
             return JsonResponse(
                 {"message": "You do not have permission to update this problem!"},
-                status=status.HTTP_400_BAD_REQUEST,
+                status=status.HTTP_403_FORBIDDEN,
             )
         serializer = ProblemSerializer(problem, request.data)
         if serializer.is_valid():
@@ -231,7 +237,7 @@ class RetrieveUpdateDestroyProblemAPI(generics.RetrieveUpdateDestroyAPIView):
         ):
             return JsonResponse(
                 {"message": "You do not have permission to delete this problem!"},
-                status=status.HTTP_400_BAD_REQUEST,
+                status=status.HTTP_403_FORBIDDEN,
             )
         problem.delete()
         return JsonResponse(
@@ -242,6 +248,7 @@ class RetrieveUpdateDestroyProblemAPI(generics.RetrieveUpdateDestroyAPIView):
 class RetrieveUpdateTestdataAPI(generics.RetrieveUpdateAPIView):
     model = TestData
     serializer_class = TestDataSerializer
+    permission_classes = (IsAuthenticated,)
 
     def get(self, request, *args, **kwargs):
         problem = get_object_or_404(Problem, slug=kwargs.get("problem_slug"))
@@ -253,7 +260,7 @@ class RetrieveUpdateTestdataAPI(generics.RetrieveUpdateAPIView):
                 {
                     "message": "You do not have permission to view test data of this problem!"
                 },
-                status=status.HTTP_400_BAD_REQUEST,
+                status=status.HTTP_403_FORBIDDEN,
             )
         testdata = TestData.objects.get(problem=problem)
         return JsonResponse(
@@ -270,7 +277,7 @@ class RetrieveUpdateTestdataAPI(generics.RetrieveUpdateAPIView):
                 {
                     "message": "You do not have permission to update test data of this problem!"
                 },
-                status=status.HTTP_400_BAD_REQUEST,
+                status=status.HTTP_403_FORBIDDEN,
             )
         testdata = TestData.objects.get(problem=problem)
         serializer = TestDataSerializer(testdata, request.data)
@@ -288,6 +295,7 @@ class RetrieveUpdateTestdataAPI(generics.RetrieveUpdateAPIView):
 class RetrieveUpdateDefaultSubmissionAPI(generics.RetrieveUpdateAPIView):
     model = DefaultSubmission
     serializer_class = DefaultSubmissionSerializer
+    permission_classes = (IsAuthenticated,)
 
     def get(self, request, *args, **kwargs):
         problem = get_object_or_404(Problem, slug=kwargs.get("problem_slug"))
@@ -299,7 +307,7 @@ class RetrieveUpdateDefaultSubmissionAPI(generics.RetrieveUpdateAPIView):
                 {
                     "message": "You do not have permission to view default submission of this problem!"
                 },
-                status=status.HTTP_400_BAD_REQUEST,
+                status=status.HTTP_403_FORBIDDEN,
             )
         default_submission = DefaultSubmission.objects.get(problem=problem)
         return JsonResponse(
@@ -321,7 +329,7 @@ class RetrieveUpdateDefaultSubmissionAPI(generics.RetrieveUpdateAPIView):
                 {
                     "message": "You do not have permission to update default submission of this problem!"
                 },
-                status=status.HTTP_400_BAD_REQUEST,
+                status=status.HTTP_403_FORBIDDEN,
             )
         submission = get_object_or_404(Submission, pk=request.data["submission"])
         if submission.problem != problem:
@@ -329,7 +337,11 @@ class RetrieveUpdateDefaultSubmissionAPI(generics.RetrieveUpdateAPIView):
                 {"message": "this submission is not submission of this problem!"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
-
+        if submission.status != SubmissionStatus.COMPILE_SUCCESS:
+            return JsonResponse(
+                {"message": "submission need to compile success!"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
         default_submission = DefaultSubmission.objects.get(problem=problem)
         default_submission.submission = submission
         default_submission.save()
@@ -371,30 +383,18 @@ class SubmitProblemAPI(generics.CreateAPIView):
             ):
                 return JsonResponse(
                     {"message": "You do not have permission to submit this problem!"},
-                    status=status.HTTP_400_BAD_REQUEST,
+                    status=status.HTTP_403_FORBIDDEN,
                 )
 
         data["problem"] = problem.id
         data["user"] = self.request.user.id
-        data["code"] = request.data["code"]
+        data["source"] = request.data["source"]
         data["language"] = self.request.data["language"]
         serializer = CreateSubmissionSerializer(data=data)
         if serializer.is_valid(raise_exception=True):
             submission = serializer.save()
-            default_submission = DefaultSubmission.objects.get(problem=problem)
-            if default_submission != None and default_submission.submission != None:
-                default_submission = default_submission.submission
-                round = Round.objects.create(
-                    problem=problem,
-                    first_user=default_submission.user,
-                    second_user=self.request.user,
-                    first_submission=default_submission,
-                    second_submission=submission,
-                    num_match=1,
-                )
-                match = Match.objects.create(
-                    round=round, testcase=0, status="Q", history=dict()
-                )
+            print(submission.pk)
+            compile_submission.delay_on_commit(submission.pk)
             return JsonResponse(
                 {"status": "successful"}, status=status.HTTP_201_CREATED
             )
@@ -416,7 +416,7 @@ class ListProblemSubmissionAPI(generics.ListAPIView):
                     {
                         "message": "You do not have permission to view submission of this problem!"
                     },
-                    status=status.HTTP_400_BAD_REQUEST,
+                    status=status.HTTP_403_FORBIDDEN,
                 )
 
         submissions = Submission.objects.filter(problem=problem)
@@ -442,78 +442,17 @@ class RetrieveSubmissionAPI(generics.RetrieveAPIView):
 class ListCreateTournamentAPI(generics.ListCreateAPIView):
     model = Tournament
 
-    def log_num_group(self, num_group):
-        cnt = 0
-        while num_group != 1:
-            if num_group % 2 != 0:
-                return -1
-            num_group //= 2
-            cnt += 1
-        return cnt
-
-    def create_group(self, tournament, users, problem, num_match, index):
-        group = Group.objects.create(
-            tournament=tournament, index=index, num_match=num_match
-        )
-        for user in users:
-            group.participants.add(user)
-        for i in range(len(users)):
-            for j in range(i + 1, len(users)):
-                create_round(
-                    first_user=users[i],
-                    second_user=users[j],
-                    problem=problem,
-                    num_match=num_match,
-                    group=group,
-                    tournament=None,
-                )
-        return group
-
-    def create_tournament_table(self, id, level, left, right, bracket_seed, num_match):
-        if level == 0:
-            return {
-                "id": id,
-                "type": "leaf",
-                "left": bracket_seed[left],
-                "right": bracket_seed[right],
-                "num_match": num_match[level],
-                "round": "N/A",
-            }
-        mid = (left + right) // 2
-        left_path = self.create_tournament_table(
-            id * 2, level - 1, left, mid, bracket_seed, num_match
-        )
-        right_path = self.create_tournament_table(
-            id * 2 + 1, level - 1, mid + 1, right, bracket_seed, num_match
-        )
-        return {
-            "id": id,
-            "type": "node",
-            "left": "N/A",
-            "right": "N/A",
-            "left_path": left_path,
-            "right_path": right_path,
-            "num_match": num_match[level],
-            "round": "N/A",
-        }
-
     def create(self, request, *args, **kwargs):
         if not self.request.user.is_superuser:
             return JsonResponse(
                 {"message": "You don't have permission to create tournament"},
-                status=status.HTTP_400_BAD_REQUEST,
+                status=status.HTTP_403_FORBIDDEN,
             )
         num_group = int(self.request.data["num_group"])
-        num_matchs = request.data.getlist("num_match")
-        log_num_group = self.log_num_group(num_group)
+        log_num_group = log_2(num_group)
         if log_num_group == -1:
             return JsonResponse(
                 {"message": "The number of groups is not power of 2"},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-        if len(num_matchs) != log_num_group + 1:
-            return JsonResponse(
-                {"message": "Does not enough num_match"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
         if len(self.request.data.getlist("participants")) % num_group != 0:
@@ -539,29 +478,6 @@ class ListCreateTournamentAPI(generics.ListCreateAPIView):
             )
         tournament = serializer.save()
         tournament.problem = get_object_or_404(Problem, pk=data["problem"][0])
-        participants = tournament.participants.all()
-        num_user_per_group = len(participants) // num_group
-        groups = []
-        for index in range(0, len(participants), num_user_per_group):
-            groups.append(
-                self.create_group(
-                    tournament=tournament,
-                    users=participants[index : index + num_user_per_group],
-                    problem=tournament.problem,
-                    num_match=int(self.request.data["num_match_of_group"]),
-                    index=index // num_user_per_group + 1,
-                )
-            )
-        bracket_seed = []
-        for index in range(0, num_group, 2):
-            bracket_seed.append(str(groups[index].id) + "_1")
-            bracket_seed.append(str(groups[index + 1].id) + "_2")
-            bracket_seed.append(str(groups[index + 1].id) + "_1")
-            bracket_seed.append(str(groups[index].id) + "_2")
-        num_matchs = [int(num_match) for num_match in num_matchs]
-        tournament.tournament_table = self.create_tournament_table(
-            1, len(num_matchs) - 1, 0, len(bracket_seed) - 1, bracket_seed, num_matchs
-        )
         tournament.save()
         return JsonResponse(
             {"message": "create tournament successful"}, status=status.HTTP_201_CREATED
@@ -575,9 +491,72 @@ class ListCreateTournamentAPI(generics.ListCreateAPIView):
         )
 
 
-class RetrieveTournamentGroupAPI(generics.RetrieveAPIView):
+class ListCreateTournamentGroupAPI(generics.ListCreateAPIView):
     model = Group
     serializer_class = GroupSerializer
+    permission_classes = (IsAuthenticated,)
+
+    def create_group(self, tournament, users, problem, num_match, index):
+        group = Group.objects.create(
+            tournament=tournament, index=index, num_match=num_match
+        )
+        for user in users:
+            group.participants.add(user)
+        for i in range(len(users)):
+            for j in range(i + 1, len(users)):
+                create_round(
+                    first_user=users[i],
+                    second_user=users[j],
+                    problem=problem,
+                    num_match=num_match,
+                    group=group,
+                    tournament=None,
+                )
+        return group
+
+    def create_tournament_table(
+        self, nodes, level, left, right, bracket_seed, num_match
+    ):
+        if right - left == 1:
+            self.cnt += 1
+            nodes[str(self.cnt)] = {
+                "parent": -1,
+                "left_child": -1,
+                "right_child": -1,
+                "left_player": bracket_seed[left],
+                "right_player": bracket_seed[right],
+                "left_score": -1,
+                "right_score": -1,
+                "round": -1,
+                "knockout": 2 ** (level + 1),
+            }
+            return self.cnt
+        mid = (left + right) // 2
+        node = {
+            "parent": -1,
+            "left_child": -1,
+            "right_child": -1,
+            "left_player": "N/A",
+            "right_player": "N/A",
+            "left_score": -1,
+            "right_score": -1,
+            "round": -1,
+            "knockout": 2 ** (level + 1),
+        }
+        left_node = self.create_tournament_table(
+            nodes, level + 1, left, mid, bracket_seed, num_match
+        )
+        self.cnt += 1
+        id = self.cnt
+        nodes[str(left_node)]["parent"] = id
+        node["left_child"] = left_node
+        nodes[str(id)] = node
+        right_node = self.create_tournament_table(
+            nodes, level + 1, mid + 1, right, bracket_seed, num_match
+        )
+        nodes[str(right_node)]["parent"] = id
+        node["right_child"] = right_node
+        return id
 
     def get(self, request, *args, **kwargs):
         tournament = Tournament.objects.get(id=kwargs.get("id"))
@@ -590,7 +569,7 @@ class RetrieveTournamentGroupAPI(generics.RetrieveAPIView):
                 {
                     "message": "you don't have permission to view groups of this tournament"
                 },
-                status=status.HTTP_400_BAD_REQUEST,
+                status=status.HTTP_403_FORBIDDEN,
             )
         groups = tournament.group_set.all()
         groups_data = GroupSerializer(groups, many=True).data
@@ -598,10 +577,92 @@ class RetrieveTournamentGroupAPI(generics.RetrieveAPIView):
             groups_data[index]["summary"] = group_summary(groups[index])
         return JsonResponse({"groups": groups_data}, status=status.HTTP_200_OK)
 
+    def create(self, request, *args, **kwargs):
+        tournament = Tournament.objects.get(id=kwargs.get("id"))
+        if (
+            not self.request.user.is_superuser
+            and self.request.user not in tournament.creators.all()
+        ):
+            return JsonResponse(
+                {
+                    "message": "you don't have permission to create groups of this tournament"
+                },
+                status=status.HTTP_403_FORBIDDEN,
+            )
+        groups = request.data["groups"]
+        num_matchs = request.data["num_matchs"]
+        group_num_match = request.data["group_num_match"]
+        if len(num_matchs) != log_2(tournament.num_group) + 1:
+            return JsonResponse(
+                {"message": "Does not enough num_match"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        if len(groups) != tournament.num_group:
+            return JsonResponse(
+                {"message": "num group doesn't equal tourament num group"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        participants = tournament.participants.all()
+        num_user_per_group = len(participants) // tournament.num_group
+        for index in range(tournament.num_group):
+            groups[index] = [
+                get_object_or_404(User, pk=member) for member in groups[index]
+            ]
+            if len(groups[index]) != num_user_per_group:
+                return JsonResponse(
+                    {"message": f"group {index} doesn't enough member"},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+            for member in groups[index]:
+                if member not in participants:
+                    return JsonResponse(
+                        {"message": f"member {member.username} isn't in tournament"},
+                        status=status.HTTP_400_BAD_REQUEST,
+                    )
+                for i in range(index):
+                    if member in groups[i]:
+                        return JsonResponse(
+                            {
+                                "message": f"member {member.username} in two groups {i} and {index}"
+                            },
+                            status=status.HTTP_400_BAD_REQUEST,
+                        )
+
+        for index in range(tournament.num_group):
+            groups[index] = self.create_group(
+                tournament=tournament,
+                users=groups[index],
+                problem=tournament.problem,
+                num_match=int(group_num_match),
+                index=index + 1,
+            )
+        bracket_seed = []
+        for index in range(0, tournament.num_group, 2):
+            bracket_seed.append(str(groups[index].id) + "_1")
+            bracket_seed.append(str(groups[index + 1].id) + "_2")
+            bracket_seed.append(str(groups[index + 1].id) + "_1")
+            bracket_seed.append(str(groups[index].id) + "_2")
+        num_matchs = [int(num_match) for num_match in num_matchs]
+        num_matchs.reverse()
+        nodes = dict()
+        self.cnt = 0
+        root = self.create_tournament_table(
+            nodes, 0, 0, len(bracket_seed) - 1, bracket_seed, num_matchs
+        )
+        tournament.tournament_table = {
+            "root": root,
+            "nodes": nodes,
+        }
+        tournament.save()
+        return JsonResponse(
+            {"message": "create tournament group"}, status=status.HTTP_201_CREATED
+        )
+
 
 class RetrieveTournamentAPI(generics.RetrieveAPIView):
     model = Tournament
     serializer_class = TournamentSerializer
+    permission_classes = (IsAuthenticated,)
 
     def get(self, request, *args, **kwargs):
         tournament = get_object_or_404(Tournament, pk=kwargs.get("id"))
@@ -611,8 +672,8 @@ class RetrieveTournamentAPI(generics.RetrieveAPIView):
             and self.request.user not in tournament.participants.all()
         ):
             return JsonResponse(
-                {"message": "you don't have permission to view this group"},
-                status=status.HTTP_400_BAD_REQUEST,
+                {"message": "you don't have permission to view this tournament"},
+                status=status.HTTP_403_FORBIDDEN,
             )
         tournament_data = TournamentSerializer(tournament).data
         serialize_bracket(tournament_data["tournament_table"])
@@ -625,6 +686,7 @@ class RetrieveTournamentAPI(generics.RetrieveAPIView):
 class RetrieveTournamentProblemAPI(generics.RetrieveAPIView):
     model = Problem
     serializer_class = TournamentSerializer
+    permission_classes = (IsAuthenticated,)
 
     def get(self, request, *args, **kwargs):
         tournament = get_object_or_404(Tournament, pk=kwargs.get("id"))
@@ -634,8 +696,10 @@ class RetrieveTournamentProblemAPI(generics.RetrieveAPIView):
             and self.request.user not in tournament.participants.all()
         ):
             return JsonResponse(
-                {"message": "you don't have permission to view problem of this group"},
-                status=status.HTTP_400_BAD_REQUEST,
+                {
+                    "message": "you don't have permission to view problem of this tournament"
+                },
+                status=status.HTTP_403_FORBIDDEN,
             )
         problem_serializer = ProblemSerializer(tournament.problem)
         return JsonResponse(
@@ -644,145 +708,10 @@ class RetrieveTournamentProblemAPI(generics.RetrieveAPIView):
         )
 
 
-class UpdateTournamentNodeAPI(generics.UpdateAPIView):
-    model = Tournament
-    serializer_class = TournamentSerializer
-
-    def find_node(self, bracket, node_id):
-        if bracket["id"] == node_id:
-            return bracket
-        if bracket["type"] == "leaf":
-            return None
-        result = self.find_node(bracket["left_path"], node_id)
-        if result == None:
-            return self.find_node(bracket["right_path"], node_id)
-        return result
-
-    def update(self, request, *args, **kwargs):
-        tournament = get_object_or_404(Tournament, pk=kwargs.get("id"))
-        if (
-            not self.request.user.is_superuser
-            and self.request.user not in tournament.creators.all()
-        ):
-            return JsonResponse(
-                {"message": "you don't have permission to view change this group"},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-        node_id = kwargs.get("node")
-        bracket = tournament.tournament_table
-        node = self.find_node(bracket, node_id)
-        if node == None:
-            return JsonResponse(
-                {
-                    "message": f"can not found node {node_id} in tournament {tournament.id}"
-                },
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-        if node["type"] == "leaf":
-            if node["left"].find("_"):
-                group_id = node["left"].split("_")[0]
-                return JsonResponse(
-                    {
-                        "message": f"can not change node {node_id} in tournament {tournament.id} because group {group_id} doesn't finish"
-                    },
-                    status=status.HTTP_400_BAD_REQUEST,
-                )
-            if node["right"].find("_"):
-                group_id = node["right"].split("_")[0]
-                return JsonResponse(
-                    {
-                        "message": f"can not change node {node_id} in tournament {tournament.id} because group {group_id} doesn't finish"
-                    },
-                    status=status.HTTP_400_BAD_REQUEST,
-                )
-            if node["round"] == "N/A":
-                left_user = get_object_or_404(User, pk=int(node["left"]))
-                right_user = get_object_or_404(User, pk=int(node["right"]))
-                round = create_round(
-                    first_user=left_user,
-                    second_user=right_user,
-                    problem=tournament.problem,
-                    num_match=node["num_match"],
-                    group=None,
-                    tournament=tournament,
-                )
-                node["round"] = round.id
-                tournament.tournament_table = bracket
-                tournament.save()
-                tournament_data = TournamentSerializer(tournament).data
-                serialize_bracket(tournament_data["tournament_table"])
-                return JsonResponse(
-                    {
-                        "message": "update node successful",
-                        "tournament": tournament_data,
-                    },
-                    status=status.HTTP_200_OK,
-                )
-            return JsonResponse(
-                {
-                    "message": "node has been updated",
-                },
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-        else:
-            updated = False
-            if node["left"] == "N/A":
-                if node["left_path"]["round"] != "N/A":
-                    round = get_object_or_404(Round, pk=node["left_path"]["round"])
-                    if round.status != "I" and round.status != "N":
-                        if round.status == "F":
-                            node["left"] == round.first_user.id
-                        else:
-                            node["left"] = round.second_user.id
-                        updated = True
-            if node["right"] == "N/A":
-                if node["right_path"]["round"] != "N/A":
-                    round = get_object_or_404(Round, pk=node["right_path"]["round"])
-                    if round.status != "I" and round.status != "N":
-                        if round.status == "F":
-                            node["right"] == round.first_user.id
-                        else:
-                            node["right"] = round.second_user.id
-                        updated = True
-            if node["left"] != "N/A" and node["right"] != "N/A":
-                if node["round"] == "N/A":
-                    left_user = get_object_or_404(User, pk=int(node["left"]))
-                    right_user = get_object_or_404(User, pk=int(node["right"]))
-                    round = create_round(
-                        first_user=left_user,
-                        second_user=right_user,
-                        problem=tournament.problem,
-                        num_match=node["num_match"],
-                        group=None,
-                        tournament=tournament,
-                    )
-                    node["round"] = round.id
-                    updated = True
-
-            if updated == False:
-                return JsonResponse(
-                    {
-                        "message": f"can not change node {node_id} in tournament {tournament.id}"
-                    },
-                    status=status.HTTP_400_BAD_REQUEST,
-                )
-            else:
-                tournament.tournament_table = bracket
-                tournament.save()
-                tournament_data = TournamentSerializer(tournament).data
-                serialize_bracket(tournament_data["tournament_table"])
-                return JsonResponse(
-                    {
-                        "message": "update node successful",
-                        "tournament": tournament_data,
-                    },
-                    status=status.HTTP_200_OK,
-                )
-
-
 class RetrieveGroupAPI(generics.RetrieveAPIView):
     model = Round
     serializer_class = RoundSerializer
+    permission_classes = (IsAuthenticated,)
 
     def get(self, request, *args, **kwargs):
         group = Group.objects.get(pk=kwargs.get("id"))
@@ -793,7 +722,7 @@ class RetrieveGroupAPI(generics.RetrieveAPIView):
         ):
             return JsonResponse(
                 {"message": "you don't have permission to view rounds of this group"},
-                status=status.HTTP_400_BAD_REQUEST,
+                status=status.HTTP_403_FORBIDDEN,
             )
         rounds = group.round_set.all()
         rounds_serializer = RoundSerializer(rounds, many=True)
@@ -807,6 +736,29 @@ class RetrieveGroupAPI(generics.RetrieveAPIView):
         )
 
 
+class RetrieveTournamentParticipantAPI(generics.RetrieveAPIView):
+    model = User
+    serializer_class = UserSerializer
+    permission_classes = (IsAuthenticated,)
+
+    def get(self, request, *args, **kwargs):
+        tournament = get_object_or_404(Tournament, pk=kwargs.get("id"))
+        if (
+            not self.request.user.is_superuser
+            and self.request.user not in tournament.creators.all()
+            and self.request.user not in tournament.participants.all()
+        ):
+            return JsonResponse(
+                {"message": "you don't have permission to view problem of this group"},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+        user_serializer = UserSerializer(tournament.participants.all(), many=True)
+        return JsonResponse(
+            {"participants": user_serializer.data},
+            status=status.HTTP_200_OK,
+        )
+
+
 class ListCreateRoundAPI(generics.ListCreateAPIView):
     model = Round
     serializer_class = RoundSerializer
@@ -815,7 +767,7 @@ class ListCreateRoundAPI(generics.ListCreateAPIView):
         if self.request.user.is_anonymous:
             return JsonResponse(
                 {"message": "you don't have permission to create round"},
-                status=status.HTTP_400_BAD_REQUEST,
+                status=status.HTTP_403_FORBIDDEN,
             )
         data = request.data
         second_user = get_object_or_404(User, pk=data["user"])
@@ -847,6 +799,7 @@ class ListCreateRoundAPI(generics.ListCreateAPIView):
 class RetrieveRoundAPI(generics.RetrieveAPIView):
     model = Match
     serializer_class = MatchSerializer
+    permission_classes = (IsAuthenticated,)
 
     def get(self, request, *args, **kwargs):
         round = get_object_or_404(Round, pk=kwargs.get("id"))
@@ -857,7 +810,7 @@ class RetrieveRoundAPI(generics.RetrieveAPIView):
         ):
             return JsonResponse(
                 {"message": "you don't have permission to view matchs of round"},
-                status=status.HTTP_400_BAD_REQUEST,
+                status=status.HTTP_403_FORBIDDEN,
             )
         matchs = round.match_set.all()
         round_data = RoundSerializer(round).data
@@ -876,6 +829,7 @@ class RetrieveRoundAPI(generics.RetrieveAPIView):
 class CreateMatchAPI(generics.ListCreateAPIView):
     model = Match
     serializer_class = MatchSerializer
+    permission_classes = (IsAuthenticated,)
 
     def create(self, request, *args, **kwargs):
         round = get_object_or_404(Round, pk=kwargs.get("id"))
@@ -886,7 +840,7 @@ class CreateMatchAPI(generics.ListCreateAPIView):
         ):
             return JsonResponse(
                 {"message": "you don't have permission to create match"},
-                status=status.HTTP_400_BAD_REQUEST,
+                status=status.HTTP_403_FORBIDDEN,
             )
         num_match = len(round.match_set.all())
         if num_match == round.num_match:
@@ -894,9 +848,13 @@ class CreateMatchAPI(generics.ListCreateAPIView):
                 {"message": "round is full match"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
+        match_type = 1
+        if num_match % 2 == 1:
+            match_type = 2
         match = Match.objects.create(
-            round=round, testcase=0, status="Q", history=dict()
+            round=round, type=match_type, testcase=0, status="Q", history=dict()
         )
+        processing_match.delay_on_commit(match.pk)
         return JsonResponse(
             {"match": MatchSerializer(match).data}, status=status.HTTP_201_CREATED
         )
@@ -905,6 +863,7 @@ class CreateMatchAPI(generics.ListCreateAPIView):
 class RetrieveMatchAPI(generics.RetrieveAPIView):
     model = Match
     serializer_class = MatchSerializer
+    permission_classes = (IsAuthenticated,)
 
     def get(self, request, *args, **kwargs):
         match = get_object_or_404(Match, pk=kwargs.get("id"))
@@ -915,7 +874,7 @@ class RetrieveMatchAPI(generics.RetrieveAPIView):
         ):
             return JsonResponse(
                 {"message": "you don't have permission to view this match"},
-                status=status.HTTP_400_BAD_REQUEST,
+                status=status.HTTP_403_FORBIDDEN,
             )
         match_serializer = MatchSerializer(match)
         return JsonResponse({"match": match_serializer.data}, status=status.HTTP_200_OK)
@@ -945,7 +904,7 @@ class ListCreateChallengeAPI(generics.ListCreateAPIView):
                 {
                     "message": "you can't challenge yourself",
                 },
-                status=status.HTTP_400_BAD_REQUEST,
+                status=status.HTTP_403_FORBIDDEN,
             )
         if (
             len(
@@ -990,7 +949,7 @@ class UpdateChallengeAPI(generics.UpdateAPIView):
 
     def update(self, request, *args, **kwargs):
         challenge = get_object_or_404(Challenge, pk=kwargs.get("id"))
-        if challenge.status != "Q":
+        if challenge.status != Challenge.ChallengeStatus.REQUEST:
             return JsonResponse(
                 {
                     "message": "can't change this challenge",
@@ -1027,8 +986,8 @@ class UpdateChallengeAPI(generics.UpdateAPIView):
                     second_user=challenge.second_user,
                     problem=challenge.problem,
                     num_match=3,
-                    group=None, 
-                    tournament=None
+                    group=None,
+                    tournament=None,
                 )
                 return JsonResponse(
                     {

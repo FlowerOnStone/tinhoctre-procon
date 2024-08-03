@@ -1,4 +1,5 @@
 from django.contrib import admin
+from django import forms
 
 # Register your models here.
 
@@ -8,7 +9,7 @@ admin.site.register(UserProfile)
 
 
 class ProgramLanguageAdmin(admin.ModelAdmin):
-    list_display = ("id", "name", "compile_args")
+    list_display = ("id", "name", "compile_args", "extension")
 
 admin.site.register(ProgramLanguage, ProgramLanguageAdmin)
 
@@ -19,7 +20,15 @@ class TimezoneAdmin(admin.ModelAdmin):
 admin.site.register(Timezone, TimezoneAdmin)
 
 admin.site.register(Problem)
-admin.site.register(Submission)
+class SubmissionAdmin(admin.ModelAdmin):
+    list_display = ("id", "user", "problem", "language", "status")
+
+    def get_form(self, request, obj=None, **kwargs):
+        kwargs["widgets"] = {"source": forms.Textarea, "log": forms.Textarea}
+        return super().get_form(request, obj, **kwargs)
+
+
+admin.site.register(Submission, SubmissionAdmin)
 
 
 class TournamentAdmin(admin.ModelAdmin):

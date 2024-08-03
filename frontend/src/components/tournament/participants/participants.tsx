@@ -1,40 +1,25 @@
 import { DataTable } from '@/components/table/general-table';
-import React from 'react';
+import React, {useState, useEffect} from 'react';
 import { participantColumns } from './participantColumns';
+import groupsApiRequest from '@/api/group';
+import { ParticipantResType } from '@/schema/group';
 
-export default function Participants() {
-  const data = [
-    {
-      id: '1',
-      username: 'user1',
-      fullName: 'User One',
-      points: 100,
-      problemsCount: 10,
-    },
-    {
-      id: '2',
-      username: 'user2',
-      fullName: 'User Two',
-      points: 90,
-      problemsCount: 9,
-    },
-    {
-      id: '3',
-      username: 'user3',
-      fullName: 'User Three',
-      points: 80,
-      problemsCount: 8,
-    },
-    {
-      id: '4',
-      username: 'user4',
-      fullName: 'User Four',
-      points: 70,
-      problemsCount: 7,
-    },
-  ];
+export default function Participants({ id }: { id: string }) {
+  const [participants, setParticipants] = useState< ParticipantResType| null>(null)
+  useEffect(()=>{
+    const fetchRequest = async () => {
+      try {
+        const participantRes = await groupsApiRequest.getParticipants(id);
+        setParticipants(participantRes)
+        
+        // handle response
+      } catch (error) {
+        alert('Failed to fetch participants');
+      }
+    }
+    fetchRequest();
+  }, [id])
 
-  console.log(participantColumns);
+  return <DataTable data={participants?.participants || []} columns={participantColumns} />;
 
-  return <DataTable show={false} data={data} columns={participantColumns}></DataTable>;
 }

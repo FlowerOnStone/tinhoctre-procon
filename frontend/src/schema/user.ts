@@ -48,13 +48,13 @@ export const LoginRes = z.object({
     id: z.number(),
     username: z.string(),
     first_name: z.string(),
+    is_admin: z.boolean(),
   }),
   token: z.string(),
-  is_admin: z.boolean(),
 });
 
 export type LoginResType = z.infer<typeof LoginRes>;
 
 export type RegisterResType = LoginResType;
 
-export type User = LoginResType['user'] & { is_admin: boolean };
+export type User = LoginResType['user']

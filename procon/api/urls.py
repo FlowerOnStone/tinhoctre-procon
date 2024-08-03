@@ -65,7 +65,7 @@ urlpatterns = [
     ),
     path(
         "tournament/<int:id>/group/",
-        RetrieveTournamentGroupAPI.as_view(),
+        ListCreateTournamentGroupAPI.as_view(),
         name="view_tournament_group",
     ),
     path(
@@ -74,9 +74,9 @@ urlpatterns = [
         name="view_tournament_problem",
     ),
     path(
-        "tournament/<int:id>/node/<int:node>/",
-        UpdateTournamentNodeAPI.as_view(),
-        name="update_tournament_node",
+        "tournament/<int:id>/participants/",
+        RetrieveTournamentParticipantAPI.as_view(),
+        name="view_tournament_problem",
     ),
     path(
         "group/<int:id>/",
