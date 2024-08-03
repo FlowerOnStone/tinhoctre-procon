@@ -2,7 +2,6 @@
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
-import { z } from 'zod';
 
 import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
@@ -10,87 +9,98 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Input } from '@/components/ui/input';
 import Link from 'next/link';
 import { PasswordInput } from '@/components/password-input';
-import { languageOptions } from '@/lib/languageOptions';
+import { RegisterBody, RegisterBodyType } from '@/schema/user';
+import { ListProgrammingLanguageType, ListTimezoneType } from '@/schema/common';
+import userApiRequest from '@/api/user';
+import { useAppContext } from '@/app/app-provider';
+import { useRouter } from 'next/navigation';
 
-const formSchema = z.object({
-  username: z.string().min(2, {
-    message: 'Username must be at least 2 characters.',
-  }),
-  password: z.string().min(8, {
-    message: 'Password must be at least 8 characters.',
-  }),
-  confirmPassword: z.string().min(8, {
-    message: 'Password must be at least 8 characters.',
-  }),
-  email: z.string().email({
-    message: 'Invalid email.',
-  }),
-  fullName: z.string().min(2, {
-    message: 'Full name must be at least 2 characters.',
-  }),
-  defaultLanguage: z.string().min(2, {
-    message: 'Please select a language.',
-  }),
-});
+interface RegisterProps {
+  timezones: ListTimezoneType;
+  programmingLanguages: ListProgrammingLanguageType;
+}
 
-export default function Register() {
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
+export default function Register({ timezones, programmingLanguages }: RegisterProps) {
+  const { setUser } = useAppContext();
+  const router = useRouter();
+
+  const form = useForm<RegisterBodyType>({
+    resolver: zodResolver(RegisterBody),
     defaultValues: {
       username: '',
       password: '',
       confirmPassword: '',
       email: '',
-      fullName: '',
-      defaultLanguage: 'C++17',
+      first_name: '',
+      last_name: '',
+      preferred_language: 1,
+      timezone: timezones.find((timezone) => timezone.location === 'Ho_Chi_Minh')?.id || timezones[0].id,
     },
   });
 
   // 2. Define a submit handler.
-  function onSubmit(values: z.infer<typeof formSchema>) {
+  async function onSubmit(values: RegisterBodyType) {
     console.log(values);
+    try {
+      const response = await userApiRequest.register(values);
+
+      await userApiRequest.auth({ token: response.token });
+      const user = { ...response.user, is_admin: response.is_admin };
+      setUser(user);
+      router.push('/');
+      router.refresh();
+    } catch (error: any) {
+      console.error(error.response.data);
+      alert(error.response.data.message);
+    }
   }
 
   return (
-    <main className="w-full h-screen flex flex-col items-center justify-center px-24">
+    <main className="w-full h-screen flex flex-col items-center justify-center">
       <h1 className="text-3xl ">Đăng ký</h1>
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8 w-1/3 p-16 bg-[#EEEEEE] m-12">
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8 w-2/5 p-16 bg-[#EEEEEE] m-12">
+          <FormField
+            control={form.control}
+            name="first_name"
+            render={({ field }) => (
+              <FormItem>
+                <div className="flex w-full items-center">
+                  <FormLabel className="min-w-36">Họ và tên</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Full Name" {...field} />
+                  </FormControl>
+                </div>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="last_name"
+            render={({ field }) => (
+              <FormItem>
+                <div className="flex w-full items-center">
+                  <FormLabel className="min-w-36">Trường</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Trường" {...field} />
+                  </FormControl>
+                </div>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
           <FormField
             control={form.control}
             name="username"
             render={({ field }) => (
-              <FormItem className="flex w-full items-center">
-                <FormLabel className="min-w-36 ">Tên đăng nhập</FormLabel>
-                <FormControl>
-                  <Input placeholder="Username" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="password"
-            render={({ field }) => (
-              <FormItem className="flex w-full items-center">
-                <FormLabel className="min-w-36">Mật khẩu</FormLabel>
-                <FormControl>
-                  <PasswordInput placeholder="Password" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="confirmPassword"
-            render={({ field }) => (
-              <FormItem className="flex w-full items-center">
-                <FormLabel className="min-w-36">Xác nhận mật khẩu</FormLabel>
-                <FormControl>
-                  <PasswordInput placeholder="Confirm Password" {...field} />
-                </FormControl>
+              <FormItem>
+                <div className="flex w-full items-center">
+                  <FormLabel className="min-w-36 ">Tên đăng nhập</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Username" {...field} />
+                  </FormControl>
+                </div>
                 <FormMessage />
               </FormItem>
             )}
@@ -99,48 +109,106 @@ export default function Register() {
             control={form.control}
             name="email"
             render={({ field }) => (
-              <FormItem className="flex w-full items-center">
-                <FormLabel className="min-w-36">Email</FormLabel>
-                <FormControl>
-                  <Input placeholder="Email" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="fullName"
-            render={({ field }) => (
-              <FormItem className="flex w-full items-center">
-                <FormLabel className="min-w-36">Họ và tên</FormLabel>
-                <FormControl>
-                  <Input placeholder="Full Name" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="defaultLanguage"
-            render={({ field }) => (
-              <FormItem className="flex w-full items-center">
-                <FormLabel className="min-w-36">Ngôn ngữ mặc định</FormLabel>
-                <Select onValueChange={field.onChange} defaultValue={field.value}>
+              <FormItem>
+                <div className="flex w-full items-center">
+                  <FormLabel className="min-w-36">Email</FormLabel>
                   <FormControl>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
+                    <Input placeholder="Email" {...field} />
                   </FormControl>
-                  <SelectContent>
-                    {languageOptions.map((language) => (
-                      <SelectItem key={language.id} value={language.value}>
-                        {language.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                </div>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="password"
+            render={({ field }) => (
+              <FormItem>
+                <div className="flex w-full items-center">
+                  <FormLabel className="min-w-36">Mật khẩu</FormLabel>
+                  <FormControl>
+                    <PasswordInput placeholder="Password" {...field} />
+                  </FormControl>
+                </div>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="confirmPassword"
+            render={({ field }) => (
+              <FormItem>
+                <div className="flex w-full items-center">
+                  <FormLabel className="min-w-36">Xác nhận mật khẩu</FormLabel>
+                  <FormControl>
+                    <PasswordInput placeholder="Confirm Password" {...field} />
+                  </FormControl>
+                </div>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="timezone"
+            render={({ field }) => (
+              <FormItem>
+                <div className="flex w-full items-center">
+                  <FormLabel className="min-w-36">Múi giờ</FormLabel>
+                  <Select
+                    onValueChange={field.onChange}
+                    defaultValue={
+                      timezones.find((timezone) => timezone.location === 'Ho_Chi_Minh')?.id.toString() ||
+                      timezones[0].id.toString()
+                    }
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {timezones
+                        .slice()
+                        .sort((a, b) => a.offset_dst - b.offset_dst)
+                        .map((timezone) => (
+                          <SelectItem key={timezone.id} value={timezone.id.toString()}>
+                            {`${timezone.location} (GMT${timezone.offset_dst >= 0 ? '+' : ''}${
+                              timezone.offset_dst / 3600
+                            })`}
+                          </SelectItem>
+                        ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="preferred_language"
+            render={({ field }) => (
+              <FormItem>
+                <div className="flex w-full items-center">
+                  <FormLabel className="min-w-36">Ngôn ngữ mặc định</FormLabel>
+                  <Select onValueChange={field.onChange} defaultValue="1">
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {programmingLanguages.map((language) => (
+                        <SelectItem key={language.id} value={language.id.toString()}>
+                          {language.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
                 <FormMessage />
               </FormItem>
             )}

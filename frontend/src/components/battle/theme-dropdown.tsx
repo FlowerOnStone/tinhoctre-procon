@@ -1,9 +1,13 @@
 import React from 'react';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import monacoThemes from 'monaco-themes/themes/themelist.json';
-// import { customStyles } from "../constants/customStyles";
 
-const ThemeDropdown = ({ handleThemeChange, theme }: any) => {
+interface ThemeDropdownProps {
+  handleThemeChange: (theme: any) => void;
+  theme: string;
+}
+
+const ThemeDropdown = ({ handleThemeChange, theme }: ThemeDropdownProps) => {
   return (
     <Select onValueChange={handleThemeChange} defaultValue={theme}>
       <SelectTrigger className="w-[180px]">
@@ -13,25 +17,12 @@ const ThemeDropdown = ({ handleThemeChange, theme }: any) => {
         <SelectGroup>
           {Object.entries(monacoThemes).map(([themeId, themeName]) => (
             <SelectItem key={themeId} value={themeId}>
-              {/* {themeName} */}
+              {themeName}
             </SelectItem>
           ))}
         </SelectGroup>
       </SelectContent>
     </Select>
-
-    // <Select
-
-    //   // options={languageOptions}
-    //   options={Object.entries(monacoThemes).map(([themeId, themeName]) => ({
-    //     label: themeName,
-    //     value: themeId,
-    //     key: themeId,
-    //   }))}
-    //   value={theme}
-    //   styles={customStyles}
-    //   onChange={handleThemeChange}
-    // />
   );
 };
 

@@ -141,9 +141,9 @@ class LoginAPI(generics.GenericAPIView):
             {
                 "user": user_data,
                 "token": AuthToken.objects.create(user)[1],
+                "is_admin": user.is_superuser,
             }
         )
-
 
 class ListCreateProblemAPI(generics.ListCreateAPIView):
     model = Problem

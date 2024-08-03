@@ -65,7 +65,8 @@ const TestCaseEditor: React.FC<TestCaseEditorProps> = ({ data }) => {
                   <FormControl>
                     <div className="flex-col ml-10 items-center min-w-36">
                       <p style={{ fontSize: '0.875rem', textAlign: 'center' }}>Hiện tại: {field.value ? (field.value as File).name : 'Chưa có tệp nào'}</p>
-                      <Input className='mt-2' type="file" onChange={handleFileChange} />
+                      <Input onMouseEnter={(e)=>{(e.currentTarget).style.cursor = 'pointer'}}
+                      onMouseLeave={(e)=>{(e.currentTarget).style.cursor = 'unset'}}  className='mt-2' type="file" onChange={handleFileChange} />
                     </div>
                   </FormControl>
                   <FormMessage className="mt-2 ml-4" />

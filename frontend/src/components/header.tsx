@@ -1,42 +1,120 @@
 'use client';
 
+import { useAppContext } from '@/app/app-provider';
 import Link from 'next/link';
 import React from 'react';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from './ui/dropdown-menu';
+import { Button } from './ui/button';
+import { LogOut, User } from 'lucide-react';
+import { Logout } from '@/components/logout';
 
-const routes = [
+const userRoutes = [
   { name: 'Logo', href: '/' },
-  { name: 'Thi đấu', href: '/battle' },
-  { name: 'Cuộc thi', href: '/contest' },
+  { name: 'Cuộc thi', href: '/tournaments' },
 ];
 
-export default function Header({ isFixed = true }: { isFixed?: boolean }) {
+const adminRoutes = [
+  { name: 'Logo', href: '/' },
+  { name: 'Cuộc thi', href: '/tournaments' },
+];
+
+export default function Header() {
+  const { user } = useAppContext();
+
+  const routes = user?.is_admin ? adminRoutes : userRoutes;
+
   return (
-    <header
-      className={`${
-        isFixed ? 'fixed' : 'sticky'
-      } top-0 w-full flex justify-center bg-[#15518B] z-30 transition-all text-white`}
-    >
-      <div className="mx-5 flex h-16 max-w-screen-2xl items-center justify-between w-full">
+    <header className="fixed top-0 w-full flex justify-center bg-[#15518B] z-30 transition-all text-white">
+      <div className="flex h-16 max-w-screen-2xl items-center justify-between w-full mx-[50px]">
         <div className="flex gap-5">
-          {routes.map((route) => (
-            <Link key={route.href} href={route.href} className="font-display text-xl">
-              <p>{route.name}</p>
+          {routes.map((route) => {
+            return (
+              <Link
+                key={route.href}
+                href={route.href}
+                className="font-display text-xl hover:font-semibold transition duration-300"
+              >
+                {route.name}
+              </Link>
+            );
+          })}
+          {user?.is_admin && <AdminDropdown />}
+        </div>
+        {user ? (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" className="text-black">
+                {user.username}
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="w-56">
+              <DropdownMenuLabel>{user.first_name}</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuGroup>
+                <DropdownMenuItem>
+                  <User className="mr-2 h-4 w-4" />
+                  <Link href={'/profile'} className="text-base hover:font-semibold transition duration-300">
+                    Thông tin cá nhân
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem>
+                  <LogOut className="mr-2 h-4 w-4" />
+                  <Logout></Logout>
+                </DropdownMenuItem>
+              </DropdownMenuGroup>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        ) : (
+          <div className="flex gap-5">
+            <Link href="/login" className="font-display text-xl hover:font-semibold transition duration-300">
+              Đăng nhập
             </Link>
-          ))}
-        </div>
-        <div className="flex gap-5">
-          {/* {session ? (
-            <UserDropdown session={session} />
-          ) : ( */}
-          <Link href="/login" className="font-display text-xl">
-            <p>Đăng nhập</p>
-          </Link>
-          <Link href="/register" className="font-display text-xl">
-            <p>Đăng ký</p>
-          </Link>
-          {/* )} */}
-        </div>
+            <Link href="/register" className="font-display text-xl hover:font-semibold transition duration-300">
+              Đăng ký
+            </Link>
+          </div>
+        )}
       </div>
     </header>
+  );
+}
+
+function AdminDropdown() {
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger style={{ display: 'flex', alignItems: 'center' }} asChild>
+        <p className="text-xl hover:font-semibold transition duration-300 cursor-pointer">Quản lý</p>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent className="w-56">
+        <DropdownMenuGroup>
+          <DropdownMenuItem>
+            <Link href={'/testcase/'} className="text-base hover:font-semibold transition duration-300">
+              Test case
+            </Link>
+          </DropdownMenuItem>
+          <DropdownMenuItem>
+            <Link href={'/problem/'} className="text-base hover:font-semibold transition duration-300">
+              Bài tập
+            </Link>
+          </DropdownMenuItem>
+          <DropdownMenuItem>
+            <Link
+              href={'/submission/'}
+              className="text-base hover:font-semibold transition duration-300 cursor-pointer"
+            >
+              Các bài nộp
+            </Link>
+          </DropdownMenuItem>
+        </DropdownMenuGroup>
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 }
