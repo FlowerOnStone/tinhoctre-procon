@@ -27,6 +27,7 @@ def create_round(
     num_match: int,
     group: Group,
     tournament: Tournament,
+    challenge: Challenge = None,
 ) -> Round:
     first_submission = get_last_submission(first_user, problem)
     second_submission = get_last_submission(second_user, problem)
@@ -40,6 +41,7 @@ def create_round(
     )
     result.group = group
     result.tournament = tournament
+    result.challenge = challenge
     result.save()
     return result
 

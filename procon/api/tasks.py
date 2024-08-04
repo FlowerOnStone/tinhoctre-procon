@@ -377,6 +377,7 @@ def update_bracket_leaf(bracket, group: Group, result):
                 num_match=node["num_match"],
                 group=None,
                 tournament=group.tournament,
+                challenge=None,
             )
             node["round"] = round.pk
 
@@ -458,12 +459,18 @@ def update_tournament_round(round: Round):
                         num_match=parent["num_match"],
                         group=None,
                         tournament=tournament,
+                        challenge=None,
                     )
                     parent["round"] = round.pk
             break
     tournament.tournament_table = bracket
     tournament.save()
 
+
+def update_challenge(round: Round):
+    challenge = round.challenge
+    challenge.status = Challenge.ChallengeStatus.DONE
+    challenge.save()
 
 def update_round(match: Match):
     round = match.round
@@ -495,7 +502,8 @@ def update_round(match: Match):
             update_group(round.group)
         if round.tournament is not None:
             update_tournament_round(round)
-
+        if round.challenge is not None:
+            update_challenge(round)
 
 def start_group(group: Group):
     if group.status == Group.GroupStatus.NOT_STARTED:

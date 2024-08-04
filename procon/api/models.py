@@ -202,6 +202,35 @@ class Group(models.Model):
     status = models.CharField(max_length=1, choices=GroupStatus.choices, default="N")
     num_match = models.IntegerField(default=0)
 
+class Challenge(models.Model):
+
+    class ChallengeStatus(models.TextChoices):
+        REQUEST = "Q"
+        IN_PROGRESS = "I"
+        DONE = "D"
+        REJECT = "R"
+        CANCEL = "C"
+
+    first_user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        blank=True,
+        null=False,
+        related_name="chanllenge_first_user",
+    )
+    second_user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        blank=True,
+        null=False,
+        related_name="chanllenge_second_user",
+    )
+    problem = models.ForeignKey(
+        Problem, on_delete=models.CASCADE, blank=False, null=False
+    )
+    status = models.CharField(
+        max_length=1, choices=ChallengeStatus.choices, default="Q"
+    )
 
 class Round(models.Model):
     class RoundStatus(models.TextChoices):
@@ -215,6 +244,7 @@ class Round(models.Model):
         Tournament, on_delete=models.SET_NULL, blank=True, null=True
     )
     group = models.ForeignKey(Group, on_delete=models.SET_NULL, blank=True, null=True)
+    challenge = models.ForeignKey(Challenge, on_delete=models.SET_NULL, blank=True, null=True)
     problem = models.ForeignKey(
         Problem, on_delete=models.CASCADE, blank=False, null=False
     )
@@ -268,32 +298,3 @@ class Match(models.Model):
     first_score = models.IntegerField(default=0)
     second_score = models.IntegerField(default=0)
 
-
-class Challenge(models.Model):
-
-    class ChallengeStatus(models.TextChoices):
-        REQUEST = "Q"
-        ACCEPT = "A"
-        REJECT = "R"
-        CANCEL = "C"
-
-    first_user = models.ForeignKey(
-        User,
-        on_delete=models.CASCADE,
-        blank=True,
-        null=False,
-        related_name="chanllenge_first_user",
-    )
-    second_user = models.ForeignKey(
-        User,
-        on_delete=models.CASCADE,
-        blank=True,
-        null=False,
-        related_name="chanllenge_second_user",
-    )
-    problem = models.ForeignKey(
-        Problem, on_delete=models.CASCADE, blank=False, null=False
-    )
-    status = models.CharField(
-        max_length=1, choices=ChallengeStatus.choices, default="Q"
-    )
