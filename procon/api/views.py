@@ -411,10 +411,14 @@ class ListProblemSubmissionAPI(generics.ListAPIView):
                 status=status.HTTP_403_FORBIDDEN,
             )
 
-        submissions = Submission.objects.filter(problem=problem)
-        submissions_serializer = ListSubmissionSerializer(submissions, many=True)
+        submissions = Submission.objects.filter(problem=problem).order_by("-id")
+        submissions_data = ListSubmissionSerializer(submissions, many=True).data
+        for index in range(len(submissions)):
+            submissions_data[index]["user"] = submissions[index].user.username
+            submissions_data[index]["problem"] = submissions[index].problem.name
+            submissions_data[index]["language"] = submissions[index].language.name
         return JsonResponse(
-            submissions_serializer.data, safe=False, status=status.HTTP_200_OK
+            submissions_data, safe=False, status=status.HTTP_200_OK
         )
 
 
@@ -798,10 +802,13 @@ class ListCreateRoundAPI(generics.ListCreateAPIView):
         )
 
     def get(self, request, *args, **kwargs):
-        rounds = Round.objects.all()
-        rounds_serializer = RoundSerializer(rounds, many=True)
+        rounds = Round.objects.all().order_by("-id")
+        rounds_data = RoundSerializer(rounds, many=True).data
+        for index in range(len(rounds)):
+            rounds_data[index]["first_user"] = UserSerializer(rounds[index].first_user).data
+            rounds_data[index]["second_user"] = UserSerializer(rounds[index].second_user).data
         return JsonResponse(
-            {"rounds": rounds_serializer.data}, status=status.HTTP_200_OK
+            {"rounds": rounds_data}, status=status.HTTP_200_OK
         )
 
 

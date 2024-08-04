@@ -124,13 +124,12 @@ class ListSubmissionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Submission
         fields = (
+            "id",
+            "submission_time",
             "user",
             "problem",
             "language",
             "status",
-            "total_point",
-            "time",
-            "memory",
         )
 
 
