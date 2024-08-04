@@ -704,12 +704,15 @@ class RetrieveGroupAPI(generics.RetrieveAPIView):
                 status=status.HTTP_403_FORBIDDEN,
             )
         rounds = group.round_set.all()
-        rounds_serializer = RoundSerializer(rounds, many=True)
+        rounds_serializer = RoundSerializer(rounds, many=True).data
+        for index in range(len(rounds)):
+            rounds_serializer[index]["first_user"] = rounds[index].first_user.first_name
+            rounds_serializer[index]["second_user"] = rounds[index].second_user.first_name
         return JsonResponse(
             {
                 "group": GroupSerializer(group).data,
                 "summary": group_summary(group),
-                "rounds": rounds_serializer.data,
+                "rounds": rounds_serializer,
             },
             status=status.HTTP_200_OK,
         )
@@ -906,12 +909,12 @@ class ListCreateChallengeAPI(generics.ListCreateAPIView):
                 {"message": "you can't challenge yourself"},
                 status=status.HTTP_403_FORBIDDEN,
             )
-        if get_last_submission(self.request.user, problem):
+        if get_last_submission(self.request.user, problem) is None:
             return JsonResponse(
                 {"message": f"you have no submission of problem {problem.id}"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
-        if get_last_submission(second_user, problem):
+        if get_last_submission(second_user, problem) is None:
             return JsonResponse(
                 {
                     "message": f"user {second_user.first_name} have no submission of problem {problem.id}"
