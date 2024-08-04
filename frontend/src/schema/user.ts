@@ -55,7 +55,6 @@ export type UserType = z.infer<typeof User>;
 export const LoginRes = z.object({
   user: User,
   token: z.string(),
-  is_admin: z.boolean(),
 });
 
 export type LoginResType = z.infer<typeof LoginRes>;

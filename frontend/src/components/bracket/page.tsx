@@ -1,172 +1,26 @@
 "use client";
+import tournamentApiRequest from "@/api/tournament";
+import { DetailTournamentResType } from "@/schema/tournament";
 import Link from "next/link";
-import React from "react";
+import React, { useEffect, useState } from "react";
 
-const TournamentBracket: React.FC = () => {
-  const data = {
-    round1: {
-      game1: {
-        player1: {
-          name: "Player 1",
-          score: 10,
-        },
-        player2: {
-          name: "Player 2",
-          score: 8,
-        },
-      },
-      game2: {
-        player1: {
-          name: "Player 1",
-          score: 10,
-        },
-        player2: {
-          name: "Player 2",
-          score: 8,
-        },
-      },
-      game3: {
-        player1: {
-          name: "Player 1",
-          score: 10,
-        },
-        player2: {
-          name: "Player 2",
-          score: 8,
-        },
-      },
-      game4: {
-        player1: {
-          name: "Player 1",
-          score: 10,
-        },
-        player2: {
-          name: "Player 2",
-          score: 8,
-        },
-      },
-      game5: {
-        player1: {
-          name: "Player 1",
-          score: 10,
-        },
-        player2: {
-          name: "Player 2",
-          score: 8,
-        },
-      },
-      game6: {
-        player1: {
-          name: "Player 1",
-          score: 10,
-        },
-        player2: {
-          name: "Player 2",
-          score: 8,
-        },
-      },
-      game7: {
-        player1: {
-          name: "Player 1",
-          score: 10,
-        },
-        player2: {
-          name: "Player 2",
-          score: 8,
-        },
-      },
-      game8: {
-        player1: {
-          name: "Player 1",
-          score: 10,
-        },
-        player2: {
-          name: "Player 2",
-          score: 8,
-        },
-      },
-    },
+export default function TournamentBracket({ id }: { id: string }) {
+  const [bracket, setBracket] = useState<DetailTournamentResType | null>(null)
+  useEffect(()=>{
+    const fetchRequest = async () => {
+      try {
+        const tournamentBracketRes = await tournamentApiRequest.getDetailTournament(id);
+        setBracket(tournamentBracketRes)
+        
+        // handle response
+      } catch (error) {
+        alert('Failed to fetch tournament bracket');
+      }
+    }
 
-    round2: {
-      game1: {
-        player1: {
-          name: "Player 1",
-          score: 10,
-        },
-        player2: {
-          name: "Player 2",
-          score: 8,
-        },
-      },
-      game2: {
-        player1: {
-          name: "Player 1",
-          score: 10,
-        },
-        player2: {
-          name: "Player 2",
-          score: 8,
-        },
-      },
-      game3: {
-        player1: {
-          name: "Player 1",
-          score: 10,
-        },
-        player2: {
-          name: "Player 2",
-          score: 8,
-        },
-      },
-      game4: {
-        player1: {
-          name: "Player 1",
-          score: 10,
-        },
-        player2: {
-          name: "Player 2",
-          score: 8,
-        },
-      },
-    },
-
-    round3: {
-      game1: {
-        player1: {
-          name: "Player 1",
-          score: 10,
-        },
-        player2: {
-          name: "Player 2",
-          score: 8,
-        },
-      },
-      game2: {
-        player1: {
-          name: "Player 1",
-          score: 10,
-        },
-        player2: {
-          name: "Player 2",
-          score: 8,
-        },
-      },
-    },
-
-    round4: {
-      game1: {
-        player1: {
-          name: "Player 1",
-          score: 10,
-        },
-        player2: {
-          name: "Player 2",
-          score: 8,
-        },
-      },
-    },
-  };
-
+    fetchRequest();
+  }, [id])
+  console.log(bracket)
   const rows = Array.from({ length: 30 }, (_, index) => index + 1);
   const columns = Array.from(
     { length: 10 },
@@ -177,7 +31,7 @@ const TournamentBracket: React.FC = () => {
   );
   const round2 = [2, 3, 10, 11, 18, 19, 26, 27];
   const round3 = [6, 7, 22, 23];
-  const round4 = [13, 14];
+  const round4 = [14, 15];
 
   const startIndexRound1 = Array.from(
     { length: 30 },
@@ -199,7 +53,7 @@ const TournamentBracket: React.FC = () => {
     (num) => num % 16 === 6
   );
   const endIndexRound3 = Array.from({ length: 30 }, (_, index) => index).filter(
-    (num) => num % 30 === 13
+    (num) => num % 30 === 14
   );
 
   const middleIndexRound1 = Array.from(
@@ -273,9 +127,37 @@ const TournamentBracket: React.FC = () => {
   };
 
   const getMatch = (rowIndex: number, colIndex: number) => {
-    if (colIndex === 1) {
+    const round16 = [1, 3, 5, 7, 9, 11, 13, 15];
+    const quarterfinal = [2, 6, 10, 14];
+    const semifinal = [4, 12];
+    const final = [8];
+  
+    if ((round16.includes(Math.round((rowIndex + 1) / 2)) && colIndex === 0)
+      || (quarterfinal.includes(Math.round((rowIndex + 1) / 2)) && colIndex === 3) 
+    ||(semifinal.includes(Math.round((rowIndex + 1) / 2)) && colIndex === 6) 
+    || (final.includes(Math.ceil((rowIndex + 1) / 2)) && colIndex === 9))  {
+
+      const node = bracket?.tournament?.tournament_table?.nodes[Math.round((rowIndex + 1) / 2).toString() as keyof typeof bracket.tournament.tournament_table.nodes];
+
+      if (node) {
+        if (rowIndex % 2 === 1) {
+          return {
+            player: node.left_player,
+            score: node.left_score === -1 ? '': node.left_score
+          };
+        } else {
+          return {
+            player: node.right_player,
+            score: node.right_score === -1 ? '': node.right_score
+          }
+        }
+      }
     }
-    return "";
+
+    return {
+      player: 'N/A',
+      score: ''
+    }; // Return undefined if no match is found
   };
 
   return (
@@ -307,12 +189,12 @@ const TournamentBracket: React.FC = () => {
                       key={`${rowIndex}-${colIndex}`}
                       style={style || {}}
                     >
-                      <Link href={'/statusbar'}>
+                      <Link href={'/statusbar/'}>
                       <span>
-                        {style.border !== ""  ? `Row ${rowIndex}, Col ${colIndex + 1}` : ""}
+                        {style.border !== ""  ? getMatch(rowIndex, colIndex).player : ""}
                       </span>
                       <span style={{float: 'right', backgroundColor: 'white', color: 'black', padding: '0px 4px', fontWeight: '800'}}>
-                        {style.border !== ""  ? 10 : ""}
+                        {style.border !== ""  ? getMatch(rowIndex, colIndex).score : ""}
                       </span>
                       </Link>
                     </td>
@@ -329,4 +211,3 @@ const TournamentBracket: React.FC = () => {
   );
 };
 
-export default TournamentBracket;
