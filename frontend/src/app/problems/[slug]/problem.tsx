@@ -1,5 +1,7 @@
 'use client';
 import problemsApiRequest from '@/api/problem';
+import submitApiRequest from '@/api/submission';
+import { useAppContext } from '@/app/app-provider';
 import CodeEditorWindow from '@/components/battle/code-editor-window';
 import LanguagesDropdown from '@/components/battle/languages-dropdown';
 import ThemeDropdown from '@/components/battle/theme-dropdown';
@@ -13,6 +15,7 @@ import { ProblemType } from '@/schema/problem';
 import { Check, Clock4, Cpu } from 'lucide-react';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
+import { toast } from 'react-toastify';
 
 interface Params {
   slug: string;
@@ -20,10 +23,12 @@ interface Params {
 }
 
 export default function ProblemDetail({ slug, programmingLanguages }: Params) {
+  const { user } = useAppContext();
+
   const [problem, setProblem] = useState<ProblemType | null>(null);
   const [code, setCode] = useState(javascriptDefault);
   const [theme, setTheme] = useState('cobalt');
-  const [language, setLanguage] = useState(programmingLanguages[0].id.toString());
+  const [language, setLanguage] = useState(user?.preferred_language.name || 'C++ 11');
 
   const onSelectChange = (sl: string) => {
     console.log('selected Option...', sl);
@@ -51,7 +56,16 @@ export default function ProblemDetail({ slug, programmingLanguages }: Params) {
   }, [slug]);
 
   function handleSubmit() {
-    console.log('submit', code, language, theme);
+    const languageId = programmingLanguages.find((lang) => lang.name === language)?.id || 2;
+    try {
+      const res = submitApiRequest.submitCode(slug, {
+        source: code,
+        language: languageId,
+      });
+      toast.success('Submit successfully');
+    } catch (error: any) {
+      toast.error('Submit failed');
+    }
   }
 
   return (
@@ -59,7 +73,16 @@ export default function ProblemDetail({ slug, programmingLanguages }: Params) {
       <div className="pb-4">
         <div className="flex justify-between py-3">
           <h1 className="text-3xl font-bold">{problem?.name}</h1>
-          {(localStorage.getItem('startTournament') !== null && localStorage.getItem('endTournament') !== null) ? <Timer initialTime={calculateTimeInSeconds(localStorage.getItem('startTournament'), localStorage.getItem('endTournament'))} /> : <></>}
+          {localStorage.getItem('startTournament') !== null && localStorage.getItem('endTournament') !== null ? (
+            <Timer
+              initialTime={calculateTimeInSeconds(
+                localStorage.getItem('startTournament'),
+                localStorage.getItem('endTournament')
+              )}
+            />
+          ) : (
+            <></>
+          )}
         </div>
         <div>
           <div className="bg-[#fff6dd] p-4 rounded-lg shadow-sm flex flex-wrap items-center gap-4 w-full">
@@ -106,7 +129,7 @@ export default function ProblemDetail({ slug, programmingLanguages }: Params) {
             <Link href="/testcase">Run code</Link>
           </Button>
           <Button variant={'submit'} className="mt-4" onClick={handleSubmit}>
-            <Link href="/submit">Submit code</Link>
+            <Link href={`${slug}/submission`}>Submit code</Link>
           </Button>
         </div>
       </div>

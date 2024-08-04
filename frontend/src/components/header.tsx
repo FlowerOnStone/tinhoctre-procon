@@ -19,11 +19,13 @@ import { Logout } from '@/components/logout';
 const userRoutes = [
   { name: 'Logo', href: '/' },
   { name: 'Cuộc thi', href: '/tournaments' },
+  { name: 'Vòng đấu', href: '/round' },
 ];
 
 const adminRoutes = [
   { name: 'Logo', href: '/' },
   { name: 'Cuộc thi', href: '/tournaments' },
+  { name: 'Vòng đấu', href: '/round' },
   { name: 'Bài toán', href: '/problems' },
 ];
 
