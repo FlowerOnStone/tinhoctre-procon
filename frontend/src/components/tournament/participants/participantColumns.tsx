@@ -1,7 +1,5 @@
-import { ParticipantResType, ParticipantType } from '@/schema/group';
+import { ParticipantType } from '@/schema/group';
 import { ColumnDef } from '@tanstack/react-table';
-
-
 
 export const participantColumns: ColumnDef<ParticipantType>[] = [
   {

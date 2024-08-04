@@ -22,3 +22,10 @@ export function formatDateTime(isoString: string | undefined): string {
     return 'Invalid date';
   }
 }
+
+export function flattenArrays(nestedArrays: number[][]): number[] {
+  if (!nestedArrays) {
+    return [];
+  }
+  return nestedArrays.reduce((acc, curr) => acc.concat(curr), []);
+}

@@ -2,7 +2,6 @@
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import TournamentBracket from '@/components/bracket/page';
-// import GeneralTournamentPage from '@/components/tournament/general/page';
 import SubmitPage from '@/app/submit/page';
 import Participants from '@/components/tournament/participants/participants';
 import Problems from '@/components/tournament/problems/problems';
@@ -28,7 +27,7 @@ export default function TournamentDetailPage({ params }: { params: { id: string 
   }, [params.id]);
 
   return (
-    <div className="my-0 mx-10">
+    <div>
       <h1 className="text-4xl font-bold text-gray-700 mb-4">{tournament?.name}</h1>
 
       <div className="flex flex-col gap-1 mb-4">
