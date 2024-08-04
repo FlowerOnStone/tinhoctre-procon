@@ -19,15 +19,19 @@ import { Logout } from '@/components/logout';
 const userRoutes = [
   { name: 'Logo', href: '/' },
   { name: 'Cuộc thi', href: '/tournaments' },
+  { name: 'Vòng đấu', href: '/round' },
 ];
 
 const adminRoutes = [
   { name: 'Logo', href: '/' },
   { name: 'Cuộc thi', href: '/tournaments' },
+  { name: 'Vòng đấu', href: '/round' },
+  { name: 'Bài toán', href: '/problems' },
 ];
 
 export default function Header() {
   const { user } = useAppContext();
+  console.log(user);
 
   const routes = user?.is_admin ? adminRoutes : userRoutes;
 
@@ -67,7 +71,7 @@ export default function Header() {
                 </DropdownMenuItem>
                 <DropdownMenuItem>
                   <LogOut className="mr-2 h-4 w-4" />
-                  <Logout></Logout>
+                  <Logout />
                 </DropdownMenuItem>
               </DropdownMenuGroup>
             </DropdownMenuContent>

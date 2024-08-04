@@ -22,10 +22,8 @@ export function Logout() {
   async function handleLogout() {
     try {
       const response = await userApiRequest.logout();
-      console.log('logout success');
-      localStorage.removeItem('user');
-      localStorage.removeItem('token');
       setUser(null);
+      router.push('/');
       router.refresh();
     } catch (error: any) {
       console.log(error);

@@ -43,18 +43,34 @@ export const RegisterBody = z
 
 export type RegisterBodyType = z.infer<typeof RegisterBody>;
 
-export const LoginRes = z.object({
-  user: z.object({
-    id: z.number(),
-    username: z.string(),
-    first_name: z.string(),
-  }),
-  token: z.string(),
+export const User = z.object({
+  id: z.number(),
+  username: z.string(),
+  first_name: z.string(),
   is_admin: z.boolean(),
+  preferred_language: z.object({
+    id: z.number(),
+    name: z.string(),
+  }),
+});
+
+export type UserType = z.infer<typeof User>;
+
+export const LoginRes = z.object({
+  user: User,
+  token: z.string(),
 });
 
 export type LoginResType = z.infer<typeof LoginRes>;
 
 export type RegisterResType = LoginResType;
 
-export type User = LoginResType['user'] & { is_admin: boolean };
+export const UserRes = z.object({
+  id: z.number(),
+  username: z.string(),
+  first_name: z.string(),
+});
+
+export type UserResType = z.infer<typeof UserRes>;
+
+export type UserListResType = UserResType[];
