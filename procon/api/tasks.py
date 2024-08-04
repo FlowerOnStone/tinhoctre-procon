@@ -346,40 +346,32 @@ def play_game(
 
 
 def update_bracket_leaf(bracket, group: Group, result):
-    def update_bracket_leaf_participant(participant: str, group: Group, result):
-        if type(participant) == int:
-            return participant
-        group_id, index = map(int, participant.split("_"))
-        if group_id == group.id:
-            return result[index - 1][4]
-        return participant
-
-    if bracket["type"] == "node":
-        update_bracket_leaf(bracket["left_path"], group, result)
-        update_bracket_leaf(bracket["right_path"], group, result)
-    else:
-        bracket["left"] = update_bracket_leaf_participant(
-            bracket["left"], group, result
-        )
-        bracket["right"] = update_bracket_leaf_participant(
-            bracket["right"], group, result
-        )
+    for id in bracket["nodes"]:
+        node = bracket["nodes"][id]
+        if type(node["left_player"]) == str and node["left_player"] != "N/A":
+            group_id, top = map(int, node["left_player"].split("_"))
+            if group_id == group.id:
+                node["left_player"] = result[top - 1][4]
+        if type(node["right_player"]) == str and node["right_player"] != "N/A":
+            group_id, top = map(int, node["right_player"].split("_"))
+            if group_id == group.id:
+                node["right_player"] = result[top - 1][4]
         if (
-            type(bracket["left"]) == int
-            and type(bracket["right"]) == int
-            and type(bracket["round"]) == "N/A"
+            type(node["left_player"]) == int
+            and type(node["right_player"]) == int
+            and node["round"] == -1
         ):
-            left_user = User.objects.get(pk=int(bracket["left"]))
-            right_user = User.objects.get(pk=int(bracket["right"]))
+            left_player = User.objects.get(pk=node["left_player"])
+            right_player = User.objects.get(pk=node["right_player"])
             round = create_round(
-                first_user=left_user,
-                second_user=right_user,
+                first_user=left_player,
+                second_user=right_player,
                 problem=group.tournament.problem,
-                num_match=bracket["num_match"],
+                num_match=node["num_match"],
                 group=None,
                 tournament=group.tournament,
             )
-            bracket["round"] = round.id
+            node["round"] = round.pk
 
 
 def update_group(group: Group):
@@ -419,7 +411,7 @@ def update_group(group: Group):
             result[participant]["point"],
             result[participant]["win"],
             result[participant]["draw"],
-            result[participant]["lost"],
+            result[participant]["lose"],
             result[participant]["id"],
         )
         for participant in result
@@ -433,43 +425,35 @@ def update_group(group: Group):
 
 
 def update_tournament_round(round: Round):
-    def update_bracket_round(bracket, round: Round):
-        if bracket["round"] == round.id:
-            return True
-        if bracket["type"] == "leaf":
-            return False
-        if update_bracket_round(bracket["left_path"]):
-            if round.status == Round.RoundStatus.FIRST_WIN:
-                bracket["left"] = round.first_user.pk
-            else:
-                bracket["left"] = round.second_user.pk
-        if update_bracket_round(bracket["right_path"]):
-            if round.status == Round.RoundStatqus.FIRST_WIN:
-                bracket["right"] = round.first_user.pk
-            else:
-                bracket["right"] = round.second_user.pk
-        if (
-            type(bracket["left"]) == int
-            and type(bracket["right"]) == int
-            and type(bracket["round"]) == "N/A"
-        ):
-
-            left_user = User.objects.get(pk=int(bracket["left"]))
-            right_user = User.objects.get(pk=int(bracket["right"]))
-            round = create_round(
-                first_user=left_user,
-                second_user=right_user,
-                problem=round.tournament.problem,
-                num_match=bracket["num_match"],
-                group=None,
-                tournament=round.tournament,
-            )
-            bracket["round"] = round.id
-        return False
-
     tournament = round.tournament
     bracket = tournament.tournament_table
-    update_bracket_round(bracket, round)
+    for id in bracket["nodes"]:
+        node = bracket["nodes"][id]
+        if node["round"] == round.pk:
+            node["left_score"] = round.first_score
+            node["right_score"] = round.second_score
+            if node["parent"] != -1:
+                parent = bracket["nodes"]["id"][str(node["parent"])]
+                winner_id = round.first_user.id
+                if round.status == Round.RoundStatus.SECOND_WIN:
+                    winner_id = round.second_user.id
+                if parent["left_child"] == int(id):
+                    parent["left_player"] = winner_id
+                else:
+                    parent["right_player"] = winner_id
+                if parent["left_player"] != "N/A" and parent["right_player"] != "N/A":
+                    left_player = User.objects.get(pk=parent["left_player"])
+                    right_player = User.objects.get(pk=parent["right_player"])
+                    round = create_round(
+                        first_user=left_player,
+                        second_user=right_player,
+                        problem=tournament.problem,
+                        num_match=parent["num_match"],
+                        group=None,
+                        tournament=tournament,
+                    )
+                    parent["round"] = round.pk
+            break
     tournament.tournament_table = bracket
     tournament.save()
 
@@ -506,19 +490,19 @@ def update_round(match: Match):
             update_tournament_round(round)
 
 
-
-def start_group(group:Group):
+def start_group(group: Group):
     if group.status == Group.GroupStatus.NOT_STARTED:
         group.status = Group.GroupStatus.IN_PROGRESS
         group.save()
 
 
-def start_round(round:Round):
+def start_round(round: Round):
     if round.status == Round.RoundStatus.NOT_STARTED:
         round.status = Round.RoundStatus.IN_PROGRESS
         round.save()
         if round.group is not None:
             start_group(round.group)
+
 
 @shared_task
 def processing_match(match_id):
@@ -531,10 +515,31 @@ def processing_match(match_id):
     round = match.round
     first_submission = round.first_submission
     second_submission = round.second_submission
-    problem = round.problem
-    test_data = TestData.objects.get(problem=problem)
     if match.type == 2:
         first_submission, second_submission = second_submission, first_submission
+    if first_submission is None and second_submission is None:
+        match.status = Match.MatchStatus.DRAW
+        match.first_score = 0
+        match.second_score = 0
+        match.save()
+        update_round(match)
+        return None
+    if first_submission is None:
+        match.status = Match.MatchStatus.SECOND_WIN
+        match.first_score = 0
+        match.second_score = 1
+        match.save()
+        update_round(match)
+        return None
+    if second_submission is None:
+        match.status = Match.MatchStatus.FIRST_WIN
+        match.first_score = 1
+        match.second_score = 0
+        match.save()
+        update_round(match)
+        return None
+    problem = round.problem
+    test_data = TestData.objects.get(problem=problem)
     folder = f"tmp/match/{match_id}"
     os.makedirs(folder)
     player_1_file = "player1." + first_submission.language.extension
@@ -544,7 +549,6 @@ def processing_match(match_id):
     with open(os.path.join(folder, player_2_file), "w") as f:
         print(second_submission.source, file=f)
     referee = test_data.referee.name.split("/")[-1]
-    print(os.getcwd(), test_data.referee.path, referee)
     shutil.copy(test_data.referee.path, os.path.join(folder, referee))
     shutil.copy("api/referee_lib.py", os.path.join(folder, "referee_lib.py"))
 

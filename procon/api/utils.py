@@ -1,6 +1,6 @@
 from .models import *
 from .serializers import *
-
+from datetime import datetime
 
 def log_2(x):
     cnt = 0
@@ -78,18 +78,83 @@ def group_summary(group: Group) -> dict:
             result[round.second_user.username]["point"] += 1
     result = [result[participant] for participant in result]
     result.sort(key=point, reverse=True)
-    result = {index: result[index] for index in range (len(result))}
+    result = {index: result[index] for index in range(len(result))}
     return result
 
 
 def serialize_bracket(bracket):
-    if bracket["left"] != "N/A" and not bracket["left"].find("_"):
-        bracket["left"] = User.objects.get(id=bracket["left"]).first_name
-    if bracket["right"] != "N/A" and not bracket["right"].find("_"):
-        bracket["right"] = User.objects.get(id=bracket["right"]).first_name
-    if bracket["round"] != "N/A":
-        bracket["round"] = RoundSerializer(Round.objects.get(id=bracket["round"])).data
-    if bracket["type"] == "leaf":
-        return None
-    serialize_bracket(bracket["left_path"])
-    serialize_bracket(bracket["right_path"])
+    def serialize_id(id):
+        if type(id) == str:
+            if id == "N/A":
+                return "N/A"
+            if id.find("_"):
+                tokens = id.split("_")
+                group = Group.objects.get(pk=int(tokens[0]))
+                group_id = chr(ord("A") + group.index - 1)
+                top = "Nhất"
+                if int(tokens[1]) == 2:
+                    top = "Nhì"
+                return f"{top} bảng {group_id}"
+        user = User.objects.get(pk=int(id))
+        return user.first_name
+
+    for id in bracket["nodes"]:
+        bracket["nodes"][id]["left_player"] = serialize_id(
+            bracket["nodes"][id]["left_player"]
+        )
+        bracket["nodes"][id]["right_player"] = serialize_id(
+            bracket["nodes"][id]["right_player"]
+        )
+
+
+
+def current_time_in_range(start, end):
+    return start <= datetime.now() and datetime.now() <= end
+
+
+def check_view_problem_permission(user: User, problem: Problem) -> bool:
+    if problem.public_visible:
+        return True
+    if user.is_superuser:
+        return True
+    if user in problem.creator.all():
+        return True
+    tournaments = Tournament.objects.all()
+    for tournament in tournaments:
+        if tournament.problem == problem and user in tournament.participants.all():
+            if current_time_in_range(tournament.start_submission_time, tournament.end_submission_time):
+                return True
+            if current_time_in_range(tournament.start_combat_time, tournament.end_combat_time):
+                return True
+    return True
+
+
+def check_create_challenge_permission(user: User, problem: Problem):
+    if user.is_superuser:
+        return True
+    if user in problem.creator.all():
+        return True
+    tournaments = Tournament.objects.all()
+    for tournament in tournaments:
+        if tournament.problem == problem and user in tournament.creators.all():
+            if current_time_in_range(tournament.start_combat_time, tournament.end_combat_time):
+                return True
+    return False
+
+def check_create_match_permission(user: User, round: Round):
+    if user.is_superuser:
+        return True
+    if round.tournament is not None and round.group is not None:
+        return False
+    if round.first_user == user or round.second_user == user:
+        return True
+    return False
+
+def check_view_tournament_permission(user: User, tournament: Tournament):
+    if user.is_superuser:
+        return True
+    if user in tournament.creators.all():
+        return True
+    if tournament.participants.filter(pk=user.pk).exists() and datetime.now() >= tournament.start_submission_time:
+        return True
+    return False
