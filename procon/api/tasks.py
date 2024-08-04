@@ -261,6 +261,7 @@ def play_game(
     status = []
     inital_status = None
     tmp = ""
+    errors = []
     while True:
         referee_message = clear_msg(referee_proccess.stdout.readline())
         if referee_message == Message.START_INITIAL_STATUS:
@@ -327,6 +328,10 @@ def play_game(
             status.append(tmp)
             write_to_process(proccess=referee_proccess, msg=Message.DONE)
             continue
+        if referee_message == Message.ERROR:
+            errors.append(clear_msg(referee_proccess.stdout.readline()))
+            write_to_process(proccess=referee_proccess, msg=Message.DONE)
+            continue
 
     referee_proccess.terminate()
     player_1_proccess.terminate()
@@ -341,6 +346,8 @@ def play_game(
         "player_2_points": player_2_points,
         "status": status,
     }
+    if len(errors) > 0:
+        match.history["errors"] = errors
     match.save()
     return match
 

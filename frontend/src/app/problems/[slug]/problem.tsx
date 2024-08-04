@@ -7,6 +7,7 @@ import Timer from '@/components/battle/timer';
 import { Button } from '@/components/ui/button';
 import { javascriptDefault } from '@/lib/const';
 import { defineTheme } from '@/lib/defineTheme';
+import { calculateTimeInSeconds } from '@/lib/utils';
 import { ListProgrammingLanguageType } from '@/schema/common';
 import { ProblemType } from '@/schema/problem';
 import { Check, Clock4, Cpu } from 'lucide-react';
@@ -58,7 +59,7 @@ export default function ProblemDetail({ slug, programmingLanguages }: Params) {
       <div className="pb-4">
         <div className="flex justify-between py-3">
           <h1 className="text-3xl font-bold">{problem?.name}</h1>
-          <Timer initialTime={300} />
+          {(localStorage.getItem('startTournament') !== null && localStorage.getItem('endTournament') !== null) ? <Timer initialTime={calculateTimeInSeconds(localStorage.getItem('startTournament'), localStorage.getItem('endTournament'))} /> : <></>}
         </div>
         <div>
           <div className="bg-[#fff6dd] p-4 rounded-lg shadow-sm flex flex-wrap items-center gap-4 w-full">

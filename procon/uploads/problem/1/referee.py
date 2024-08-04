@@ -22,6 +22,30 @@ def check_winner(board):
     return None
 
 
+def validate_response(player, response, board):
+    if response == Message.ERROR:
+        write_player_error(f"{player}: player program failed")
+        return False
+    if response == Message.TIMEOUT:
+        write_player_error(f"{player}: player program timed out")
+        return False
+    try:
+        x, y = map(int, response.split())
+        if x < 0 or x >= 3:
+            write_player_error(f"{player}: x must be between 0 and 2 but received {x}")
+            return False
+        if y < 0 or y >= 3:
+            write_player_error(f"{player}: y must be between 0 and 2 but received {y}")
+            return False
+        if board[x * 3 + y] != ".":
+            write_player_error(f"{player}: cell ({x}, {y}) is not empty")
+            return False
+        return True
+    except ValueError:
+        write_player_error(f"{player}: response {response} is not in correct format")
+        return False
+
+
 def main():
     board = ["."] * 9
 
@@ -29,9 +53,10 @@ def main():
 
     while True:
         player1_response = read_from_player_1()
-        if player1_response == Message.TIMEOUT or player1_response == Message.ERROR:
+        if not validate_response("player1", player1_response, board):
             write_final_point(0, 1, Message.SECOND_WIN)
             break
+
         x, y = map(int, player1_response.split())
         board[x * 3 + y] = "X"
         start_write_status()
@@ -49,7 +74,7 @@ def main():
         # Inform Player 2 of Player 1's move
         write_to_player_2(f"{x} {y}")
         player2_response = read_from_player_2()
-        if player2_response == Message.TIMEOUT or player2_response == Message.ERROR:
+        if not validate_response("player_2", player2_response, board):
             write_final_point(1, 0, Message.FIRST_WIN)
             break
         x, y = map(int, player2_response.split())

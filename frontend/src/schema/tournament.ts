@@ -15,6 +15,7 @@ export const DetailTournamentRes = z.object({
   tournament: z.object({
     id: z.number(),
     name: z.string(),
+    problem: z.number(),
     creators: z.array(z.number()),
     participants: z.array(z.number()),
     num_group: z.number(),

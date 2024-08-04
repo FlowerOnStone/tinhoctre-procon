@@ -1,3 +1,4 @@
+import { Button } from "@/components/ui/button";
 import {
     Table,
     TableBody,
@@ -6,15 +7,20 @@ import {
   } from "@/components/ui/table";
 import {  RoundType } from "@/schema/match";
   import Link from "next/link";
+
   
   interface ScoreTableProps {
     data: RoundType | null; // Accept null for initial state
   }
   
   export function ScoreTable({ data }: ScoreTableProps) {
-    
-    if (!data) {
-      return <div style={{textAlign: 'center'}}>Loading...</div>; // Handle null data (e.g., loading state)
+    if (!data || data.matchs.length === 0) {
+      return (
+        <div>
+          <p className="text-center">Hiện không có trận thi đấu nào.</p>       
+        </div>
+      
+        );
     }
   
     return (
