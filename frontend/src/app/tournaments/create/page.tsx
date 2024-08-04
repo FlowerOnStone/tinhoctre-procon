@@ -1,6 +1,5 @@
 'use client';
 
-import { useAppContext } from '@/app/app-provider';
 import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
@@ -25,10 +24,13 @@ import userApiRequest from '@/api/user';
 import { participantColumns } from '@/components/tournament/create/participant-column';
 import tournamentApiRequest from '@/api/tournament';
 import { toast } from 'react-toastify';
-import { HttpError } from '@/lib/http';
+import { useRouter } from 'next/navigation';
+import { useAppContext } from '@/app/app-provider';
+import Forbidden from '@/components/forbidden';
 
 export default function CreateTournamentPage() {
   const { user } = useAppContext();
+  const router = useRouter();
   const [problemList, setProblemList] = useState<ProblemListResType>([]);
   const [participants, setParticipants] = useState<UserListResType>([]);
 
@@ -58,6 +60,10 @@ export default function CreateTournamentPage() {
     },
   });
 
+  if (!user?.is_admin) {
+    return <Forbidden />;
+  }
+
   async function onSubmit(values: CreateTournamentFormType) {
     if (values.participants.length % values.num_group !== 0) {
       form.setError('participants', {
@@ -83,6 +89,8 @@ export default function CreateTournamentPage() {
     try {
       await tournamentApiRequest.createTournament(formData);
       toast.success('Tạo cuộc thi thành công');
+      router.push('/tournaments');
+      router.refresh();
     } catch (error: any) {
       toast.error(error?.message || 'Tạo cuộc thi thất bại');
     }
@@ -134,7 +142,7 @@ export default function CreateTournamentPage() {
                 name="start_submission_time"
                 render={({ field }) => (
                   <FormItem className="flex-1 flex flex-col">
-                    <FormLabel className="text-left text-lg">Thời gian bắt đầu nộp bài</FormLabel>
+                    <FormLabel className="text-left text-lg w-fit">Thời gian bắt đầu nộp bài</FormLabel>
                     <Popover>
                       <FormControl>
                         <PopoverTrigger asChild>
@@ -147,7 +155,7 @@ export default function CreateTournamentPage() {
                           >
                             <CalendarIcon className="mr-2 h-4 w-4" />
                             {field.value ? (
-                              format(field.value, 'HH:mm:ss MM/dd/yyyy', { locale: vi })
+                              format(field.value, 'HH:mm:ss dd/MM/yyyy', { locale: vi })
                             ) : (
                               <span>Chọn ngày</span>
                             )}
@@ -158,7 +166,13 @@ export default function CreateTournamentPage() {
                         <div className="p-3 border-b border-border">
                           <TimePickerDemo setDate={field.onChange} date={field.value} />
                         </div>
-                        <Calendar mode="single" selected={field.value} onSelect={field.onChange} initialFocus />
+                        <Calendar
+                          mode="single"
+                          selected={field.value}
+                          onSelect={field.onChange}
+                          initialFocus
+                          disabled={(date) => date < new Date()}
+                        />
                       </PopoverContent>
                     </Popover>
                   </FormItem>
@@ -169,7 +183,7 @@ export default function CreateTournamentPage() {
                 name="end_submission_time"
                 render={({ field }) => (
                   <FormItem className="flex-1 flex flex-col">
-                    <FormLabel className="text-left text-lg">Thời gian kết thúc nộp bài</FormLabel>
+                    <FormLabel className="text-left text-lg w-fit">Thời gian kết thúc nộp bài</FormLabel>
                     <Popover>
                       <FormControl>
                         <PopoverTrigger asChild>
@@ -182,7 +196,7 @@ export default function CreateTournamentPage() {
                           >
                             <CalendarIcon className="mr-2 h-4 w-4" />
                             {field.value ? (
-                              format(field.value, 'HH:mm:ss MM/dd/yyyy', { locale: vi })
+                              format(field.value, 'HH:mm:ss dd/MM/yyyy', { locale: vi })
                             ) : (
                               <span>Chọn ngày</span>
                             )}
@@ -193,7 +207,13 @@ export default function CreateTournamentPage() {
                         <div className="p-3 border-b border-border">
                           <TimePickerDemo setDate={field.onChange} date={field.value} />
                         </div>
-                        <Calendar mode="single" selected={field.value} onSelect={field.onChange} initialFocus />
+                        <Calendar
+                          mode="single"
+                          selected={field.value}
+                          onSelect={field.onChange}
+                          initialFocus
+                          disabled={(date) => date < new Date()}
+                        />
                       </PopoverContent>
                     </Popover>
                   </FormItem>
@@ -207,7 +227,7 @@ export default function CreateTournamentPage() {
                 name="start_combat_time"
                 render={({ field }) => (
                   <FormItem className="flex-1 flex flex-col">
-                    <FormLabel className="text-left text-lg">Thời gian bắt đầu thi đấu</FormLabel>
+                    <FormLabel className="text-left text-lg w-fit">Thời gian bắt đầu thi đấu</FormLabel>
                     <Popover>
                       <FormControl>
                         <PopoverTrigger asChild>
@@ -220,7 +240,7 @@ export default function CreateTournamentPage() {
                           >
                             <CalendarIcon className="mr-2 h-4 w-4" />
                             {field.value ? (
-                              format(field.value, 'HH:mm:ss MM/dd/yyyy', { locale: vi })
+                              format(field.value, 'HH:mm:ss dd/MM/yyyy', { locale: vi })
                             ) : (
                               <span>Chọn ngày</span>
                             )}
@@ -231,7 +251,13 @@ export default function CreateTournamentPage() {
                         <div className="p-3 border-b border-border">
                           <TimePickerDemo setDate={field.onChange} date={field.value} />
                         </div>
-                        <Calendar mode="single" selected={field.value} onSelect={field.onChange} initialFocus />
+                        <Calendar
+                          mode="single"
+                          selected={field.value}
+                          onSelect={field.onChange}
+                          initialFocus
+                          disabled={(date) => date < new Date()}
+                        />
                       </PopoverContent>
                     </Popover>
                   </FormItem>
@@ -242,7 +268,7 @@ export default function CreateTournamentPage() {
                 name="end_combat_time"
                 render={({ field }) => (
                   <FormItem className="flex-1 flex flex-col">
-                    <FormLabel className="text-left text-lg">Thời gian kết thúc thi đấu</FormLabel>
+                    <FormLabel className="text-left text-lg w-fit">Thời gian kết thúc thi đấu</FormLabel>
                     <Popover>
                       <FormControl>
                         <PopoverTrigger asChild>
@@ -255,7 +281,7 @@ export default function CreateTournamentPage() {
                           >
                             <CalendarIcon className="mr-2 h-4 w-4" />
                             {field.value ? (
-                              format(field.value, 'HH:mm:ss MM/dd/yyyy', { locale: vi })
+                              format(field.value, 'HH:mm:ss dd/MM/yyyy', { locale: vi })
                             ) : (
                               <span>Chọn ngày</span>
                             )}
@@ -266,7 +292,13 @@ export default function CreateTournamentPage() {
                         <div className="p-3 border-b border-border">
                           <TimePickerDemo setDate={field.onChange} date={field.value} />
                         </div>
-                        <Calendar mode="single" selected={field.value} onSelect={field.onChange} initialFocus />
+                        <Calendar
+                          mode="single"
+                          selected={field.value}
+                          onSelect={field.onChange}
+                          initialFocus
+                          disabled={(date) => date < new Date()}
+                        />
                       </PopoverContent>
                     </Popover>
                   </FormItem>

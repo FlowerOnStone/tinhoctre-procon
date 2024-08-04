@@ -45,8 +45,8 @@ export default function Register({ timezones, programmingLanguages }: RegisterPr
       const response = await userApiRequest.register(values);
 
       await userApiRequest.auth({ token: response.token });
-      const user = { ...response.user, is_admin: response.is_admin };
-      setUser(user);
+
+      setUser(response.user);
       router.push('/');
       router.refresh();
     } catch (error: any) {

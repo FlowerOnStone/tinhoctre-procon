@@ -48,6 +48,10 @@ export const User = z.object({
   username: z.string(),
   first_name: z.string(),
   is_admin: z.boolean(),
+  preferred_language: z.object({
+    id: z.number(),
+    name: z.string(),
+  }),
 });
 
 export type UserType = z.infer<typeof User>;

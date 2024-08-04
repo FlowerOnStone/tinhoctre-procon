@@ -2,7 +2,6 @@
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import TournamentBracket from '@/components/bracket/page';
-// import GeneralTournamentPage from '@/components/tournament/general/page';
 import SubmitPage from '@/app/submit/page';
 import Participants from '@/components/tournament/participants/participants';
 import Problems from '@/components/tournament/problems/problems';

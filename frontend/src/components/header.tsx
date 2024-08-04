@@ -24,11 +24,12 @@ const userRoutes = [
 const adminRoutes = [
   { name: 'Logo', href: '/' },
   { name: 'Cuộc thi', href: '/tournaments' },
+  { name: 'Bài toán', href: '/problems' },
 ];
 
 export default function Header() {
   const { user } = useAppContext();
-  console.log(user)
+  console.log(user);
 
   const routes = user?.is_admin ? adminRoutes : userRoutes;
 

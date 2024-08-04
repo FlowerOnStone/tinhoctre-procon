@@ -23,6 +23,13 @@ export function formatDateTime(isoString: string | undefined): string {
   }
 }
 
+export function flattenArrays(nestedArrays: number[][]): number[] {
+  if (!nestedArrays) {
+    return [];
+  }
+  return nestedArrays.reduce((acc, curr) => acc.concat(curr), []);
+}
+
 export function calculateTimeInSeconds(isoString1: string | undefined | null, isoString2: string | undefined | null): number {
   if (!isoString2 || !isoString1) {
     console.error('Invalid date string');
