@@ -31,7 +31,7 @@ export default function UserFormField({
     if (fields.length === 0) {
       append([0, 0, 0]);
     }
-  }, []);
+  }, [fields.length, append]);
 
   return (
     <div className="flex flex-col gap-2">

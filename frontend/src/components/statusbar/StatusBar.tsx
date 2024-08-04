@@ -1,4 +1,4 @@
-"use client"
+'use client';
 import React, { useState, useEffect, useRef } from 'react';
 import Avatar from '../avatar/Avatar';
 import GameScreen from './gamescreen';
@@ -25,8 +25,8 @@ export default function StatusBar({ id }: { id: string }) {
 
         // Set initial score based on the last value in player_1_points and player_2_points
 
-        const latestPlayer1Score = 0
-        const latestPlayer2Score = 0
+        const latestPlayer1Score = 0;
+        const latestPlayer2Score = 0;
         setScore([latestPlayer1Score, latestPlayer2Score]);
         setWidth(getWidth([latestPlayer1Score, latestPlayer2Score]));
 
@@ -35,7 +35,6 @@ export default function StatusBar({ id }: { id: string }) {
           return { player: parseInt(playerStr, 10), x: parseInt(xStr, 10), y: parseInt(yStr, 10) };
         });
         setMoves(generatedMoves);
-
       } catch (error) {
         console.error('Failed to fetch match', error);
       }
@@ -51,9 +50,22 @@ export default function StatusBar({ id }: { id: string }) {
     if (isPlaying) {
       intervalIdRef.current = setInterval(() => {
         if (
-  (match?.match.history.player_1_points?.length ?? 0) > currentPointIndex &&
-  (match?.match.history.player_2_points?.length ?? 0) > currentPointIndex
-) {
+          (match?.match.history.player_1_points?.length ?? 0) > currentPointIndex &&
+          (match?.match.history.player_2_points?.length ?? 0) > currentPointIndex
+        ) {
+          const changeScore = () => {
+            if (match) {
+              const player1Points = match.match.history.player_1_points;
+              const player2Points = match.match.history.player_2_points;
+
+              // Update score based on the current point index
+              const newScore: [number, number] = [player1Points[currentPointIndex], player2Points[currentPointIndex]];
+
+              setScoreHistory([...scoreHistory, score]);
+              setScore(newScore);
+              setCurrentPointIndex(currentPointIndex + 1); // Move to the next point
+            }
+          };
           changeScore();
         } else {
           clearInterval(intervalIdRef.current!);
@@ -70,29 +82,15 @@ export default function StatusBar({ id }: { id: string }) {
         clearInterval(intervalIdRef.current);
       }
     };
-  }, [isPlaying, currentPointIndex, match]);
+  }, [isPlaying, currentPointIndex, match, score, scoreHistory]);
 
   const getWidth = (score: [number, number]): number => {
     let percentage = 0.5;
-    if ((score[0] + score[1]) !== 0) percentage = (score[0]) / (score[0] + score[1]);
+    if (score[0] + score[1] !== 0) percentage = score[0] / (score[0] + score[1]);
     if (percentage > 0.9 || percentage < 0.1) {
       percentage = percentage > 0.9 ? 0.9 : 0.1;
     }
     return 100 * percentage;
-  };
-
-  const changeScore = () => {
-    if (match) {
-      const player1Points = match.match.history.player_1_points;
-      const player2Points = match.match.history.player_2_points;
-
-      // Update score based on the current point index
-      const newScore: [number, number] = [player1Points[currentPointIndex], player2Points[currentPointIndex]];
-      
-      setScoreHistory([...scoreHistory, score]);
-      setScore(newScore);
-      setCurrentPointIndex(currentPointIndex + 1); // Move to the next point
-    }
   };
 
   const revertScore = () => {
@@ -112,26 +110,76 @@ export default function StatusBar({ id }: { id: string }) {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
-      <div style={{ margin: '1.7vh 1.7vh', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', backgroundColor: 'white', border: '0.2vh solid #424243', borderBottom: 'none' }}>
+      <div
+        style={{
+          margin: '1.7vh 1.7vh',
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'center',
+          alignItems: 'center',
+          backgroundColor: 'white',
+          border: '0.2vh solid #424243',
+          borderBottom: 'none',
+        }}
+      >
         <div style={{ display: 'flex', alignItems: 'center', margin: '2vh 0' }}>
           <Avatar />
 
-          <div style={{ backgroundColor: '#1c81ba', width: `${width}vh`, height: '4vh', display: 'flex', alignItems: 'center', transition: 'width 0.5s ease' }}>
+          <div
+            style={{
+              backgroundColor: '#1c81ba',
+              width: `${width}vh`,
+              height: '4vh',
+              display: 'flex',
+              alignItems: 'center',
+              transition: 'width 0.5s ease',
+            }}
+          >
             <strong style={{ color: '#ffffff', marginLeft: '1.5vh', fontSize: '1.7vh' }}>{score[0]}</strong>
           </div>
 
-          <div style={{ backgroundColor: '#ff883e', width: `${100 - width}vh`, height: '4vh', display: 'flex', alignItems: 'center', justifyContent: 'flex-end', transition: 'width 0.5s ease' }}>
+          <div
+            style={{
+              backgroundColor: '#ff883e',
+              width: `${100 - width}vh`,
+              height: '4vh',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'flex-end',
+              transition: 'width 0.5s ease',
+            }}
+          >
             <strong style={{ color: '#ffffff', marginRight: '1.5vh', fontSize: '1.7vh' }}>{score[1]}</strong>
           </div>
 
           <Avatar />
         </div>
 
-        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '75vh', width: '100%', backgroundColor: '#eeeeee', color: 'black' }}>
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            height: '75vh',
+            width: '100%',
+            backgroundColor: '#eeeeee',
+            color: 'black',
+          }}
+        >
           <GameScreen moves={moves} />
         </div>
 
-        <div style={{ width: '100%', backgroundColor: '#424243', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', height: '4vh' }}>
+        <div
+          style={{
+            width: '100%',
+            backgroundColor: '#424243',
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'center',
+            alignItems: 'center',
+            height: '4vh',
+          }}
+        >
           <div style={{ display: 'flex' }}>
             {/* <button onClick={revertScore} style={{ marginRight: '1rem' }}>
               <p style={{ color: '#ffffff', fontSize: '1.7vh' }}>Revert</p>

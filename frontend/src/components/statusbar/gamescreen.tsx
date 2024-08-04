@@ -17,6 +17,19 @@ const GameScreen: React.FC<{ moves: Move[] }> = ({ moves }) => {
   useEffect(() => {
     if (currentMoveIndex < moves.length) {
       const intervalId = setInterval(() => {
+        const updateBoard = () => {
+          if (currentMoveIndex < moves.length) {
+            const move = moves[currentMoveIndex];
+            const symbol: SquareValue = move.player === 1 ? 'X' : 'O';
+            const index = move.y * 3 + move.x;
+            setSquares((prev) => {
+              const newBoard = [...prev];
+              newBoard[index] = symbol;
+              return newBoard;
+            });
+            setCurrentMoveIndex(currentMoveIndex + 1);
+          }
+        };
         updateBoard();
       }, 1000); // Update every second
 
@@ -24,22 +37,17 @@ const GameScreen: React.FC<{ moves: Move[] }> = ({ moves }) => {
     }
   }, [currentMoveIndex, moves]);
 
-  const updateBoard = () => {
-    if (currentMoveIndex < moves.length) {
-      const move = moves[currentMoveIndex];
-      const symbol: SquareValue = move.player === 1 ? 'X' : 'O';
-      const index = move.y * 3 + move.x;
-      setSquares((prev) => {
-        const newBoard = [...prev];
-        newBoard[index] = symbol;
-        return newBoard;
-      });
-      setCurrentMoveIndex(currentMoveIndex + 1);
-    }
-  };
-
   const renderSquare = (index: number) => (
-    <td key={index} style={{ width: '100px', height: '100px', textAlign: 'center', verticalAlign: 'middle', border: '1px solid #999' }}>
+    <td
+      key={index}
+      style={{
+        width: '100px',
+        height: '100px',
+        textAlign: 'center',
+        verticalAlign: 'middle',
+        border: '1px solid #999',
+      }}
+    >
       {squares[index]}
     </td>
   );

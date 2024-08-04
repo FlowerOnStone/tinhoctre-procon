@@ -36,7 +36,7 @@ export default function GroupFormField({
       }
     };
     fetchRequest();
-  }, []);
+  }, [id]);
 
   const flattenGroups = flattenArrays(groupsWatch);
 
@@ -45,7 +45,7 @@ export default function GroupFormField({
       {[0, 1].map((item) => (
         <div className="mt-5 flex w-full justify-around gap-10" key={item}>
           {[0, 1, 2, 3].map((item2) => (
-            <Card className="">
+            <Card key={item * 4 + item2}>
               <CardHeader className="p-4 flex items-center">
                 <CardTitle className="text-base">Bảng {nameGroup[item * 4 + item2]}</CardTitle>
               </CardHeader>
