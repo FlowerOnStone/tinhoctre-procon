@@ -23,6 +23,7 @@ export function Logout() {
     try {
       const response = await userApiRequest.logout();
       setUser(null);
+      router.push('/');
       router.refresh();
     } catch (error: any) {
       console.log(error);
