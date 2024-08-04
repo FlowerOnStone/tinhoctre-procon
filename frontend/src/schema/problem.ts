@@ -27,9 +27,6 @@ export const ListProblemsRes = z.object({
 
 export type ListProblemsResType = z.infer<typeof ListProblemsRes>;
 
-<<<<<<< HEAD
-
-=======
 export const ProblemListRes = z.array(
   z.object({
     id: z.number(),
@@ -40,4 +37,3 @@ export const ProblemListRes = z.array(
 );
 
 export type ProblemListResType = z.infer<typeof ProblemListRes>;
->>>>>>> main

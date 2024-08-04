@@ -53,16 +53,7 @@ export const User = z.object({
 export type UserType = z.infer<typeof User>;
 
 export const LoginRes = z.object({
-<<<<<<< HEAD
-  user: z.object({
-    id: z.number(),
-    username: z.string(),
-    first_name: z.string(),
-    is_admin: z.boolean(),
-  }),
-=======
   user: User,
->>>>>>> main
   token: z.string(),
 });
 
@@ -70,9 +61,6 @@ export type LoginResType = z.infer<typeof LoginRes>;
 
 export type RegisterResType = LoginResType;
 
-<<<<<<< HEAD
-export type User = LoginResType['user']
-=======
 export const UserRes = z.object({
   id: z.number(),
   username: z.string(),
@@ -82,4 +70,3 @@ export const UserRes = z.object({
 export type UserResType = z.infer<typeof UserRes>;
 
 export type UserListResType = UserResType[];
->>>>>>> main
