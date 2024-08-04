@@ -10,6 +10,7 @@ import tournamentApiRequest from '@/api/tournament';
 import { useEffect, useState } from 'react';
 import { DetailTournamentResType } from '@/schema/tournament';
 import Groups from '@/components/tournament/groups/groups';
+import { formatDateTime } from '@/lib/utils';
 
 export default function TournamentDetailPage({ params }: { params: { id: string } }) {
   const [tournament, setTournament] = useState<DetailTournamentResType['tournament'] | null>(null);
@@ -41,11 +42,13 @@ export default function TournamentDetailPage({ params }: { params: { id: string 
         <div>Số lượng group: {tournament?.num_group}</div>
 
         <div>
-          Thời gian đăng ký: {tournament?.start_submission_time} - {tournament?.end_submission_time}
+          Thời gian nộp bài: {formatDateTime(tournament?.start_submission_time)} -{' '}
+          {formatDateTime(tournament?.end_submission_time)}
         </div>
 
         <div>
-          Thời gian thi đấu: {tournament?.start_combat_time} - {tournament?.end_combat_time}
+          Thời gian thi đấu: {formatDateTime(tournament?.start_combat_time)} -{' '}
+          {formatDateTime(tournament?.end_combat_time)}
         </div>
       </div>
 
