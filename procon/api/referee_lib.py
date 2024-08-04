@@ -20,6 +20,7 @@ class Message:
     TIMEOUT = "TIMEOUT"
     ERROR = "ERROR"
     DONE = "DONE"
+    PLAYER_ERROR = "PLAYER_ERROR"
 
 
 def write_to_player(msg, write_message):
@@ -104,5 +105,12 @@ def write_final_point(x, y, result):
     print(Message.FINAL_POINT)
     sys.stdout.flush()
     print(x, y, result)
+    sys.stdout.flush()
+    message = input()
+
+
+def write_player_error(msg):
+    print(Message.PLAYER_ERROR)
+    print(msg)
     sys.stdout.flush()
     message = input()

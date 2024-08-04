@@ -722,7 +722,7 @@ class RetrieveTournamentParticipantAPI(generics.RetrieveAPIView):
 
     def get(self, request, *args, **kwargs):
         tournament = get_object_or_404(Tournament, pk=kwargs.get("id"))
-        if check_view_tournament_permission(self.request.user, tournament):
+        if check_view_tournament_permission(self.request.user, tournament) is False:
             return JsonResponse(
                 {"message": "you don't have permission to view participant of this tournament"},
                 status=status.HTTP_403_FORBIDDEN,
