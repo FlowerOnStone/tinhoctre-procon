@@ -1,6 +1,6 @@
 from .models import *
 from .serializers import *
-from datetime import datetime
+from django.utils import timezone
 
 def log_2(x):
     cnt = 0
@@ -27,6 +27,7 @@ def create_round(
     num_match: int,
     group: Group,
     tournament: Tournament,
+    challenge: Challenge = None,
 ) -> Round:
     first_submission = get_last_submission(first_user, problem)
     second_submission = get_last_submission(second_user, problem)
@@ -40,6 +41,7 @@ def create_round(
     )
     result.group = group
     result.tournament = tournament
+    result.challenge = challenge
     result.save()
     return result
 
@@ -97,7 +99,8 @@ def serialize_bracket(bracket):
                 return f"{top} bảng {group_id}"
         user = User.objects.get(pk=int(id))
         return user.first_name
-
+    if "nodes" not in bracket:
+        return 
     for id in bracket["nodes"]:
         bracket["nodes"][id]["left_player"] = serialize_id(
             bracket["nodes"][id]["left_player"]
@@ -109,7 +112,7 @@ def serialize_bracket(bracket):
 
 
 def current_time_in_range(start, end):
-    return start <= datetime.now() and datetime.now() <= end
+    return start <= timezone.now() and timezone.now() <= end
 
 
 def check_view_problem_permission(user: User, problem: Problem) -> bool:
@@ -136,7 +139,7 @@ def check_create_challenge_permission(user: User, problem: Problem):
         return True
     tournaments = Tournament.objects.all()
     for tournament in tournaments:
-        if tournament.problem == problem and user in tournament.creators.all():
+        if tournament.problem == problem and user in tournament.participants.all():
             if current_time_in_range(tournament.start_combat_time, tournament.end_combat_time):
                 return True
     return False
@@ -155,6 +158,6 @@ def check_view_tournament_permission(user: User, tournament: Tournament):
         return True
     if user in tournament.creators.all():
         return True
-    if tournament.participants.filter(pk=user.pk).exists() and datetime.now() >= tournament.start_submission_time:
+    if tournament.participants.filter(pk=user.pk).exists() and timezone.now() >= tournament.start_submission_time:
         return True
     return False

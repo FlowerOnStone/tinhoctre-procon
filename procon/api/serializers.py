@@ -124,13 +124,12 @@ class ListSubmissionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Submission
         fields = (
+            "id",
+            "submission_time",
             "user",
             "problem",
             "language",
             "status",
-            "total_point",
-            "time",
-            "memory",
         )
 
 
@@ -187,6 +186,7 @@ class TournamentSerializer(serializers.ModelSerializer):
             "participants",
             "tournament_table",
             "num_group",
+            "problem",
             "start_submission_time",
             "end_submission_time",
             "start_combat_time",
@@ -236,4 +236,4 @@ class MatchSerializer(serializers.ModelSerializer):
 class ChallengeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Challenge
-        fields = ("first_user", "second_user", "problem", "status")
+        fields = ("id", "first_user", "second_user", "problem", "status")

@@ -411,10 +411,14 @@ class ListProblemSubmissionAPI(generics.ListAPIView):
                 status=status.HTTP_403_FORBIDDEN,
             )
 
-        submissions = Submission.objects.filter(problem=problem)
-        submissions_serializer = ListSubmissionSerializer(submissions, many=True)
+        submissions = Submission.objects.filter(problem=problem).order_by("-id")
+        submissions_data = ListSubmissionSerializer(submissions, many=True).data
+        for index in range(len(submissions)):
+            submissions_data[index]["user"] = submissions[index].user.username
+            submissions_data[index]["problem"] = submissions[index].problem.name
+            submissions_data[index]["language"] = submissions[index].language.name
         return JsonResponse(
-            submissions_serializer.data, safe=False, status=status.HTTP_200_OK
+            submissions_data, safe=False, status=status.HTTP_200_OK
         )
 
 
@@ -458,6 +462,7 @@ class ListCreateTournamentAPI(generics.ListCreateAPIView):
         data["tournament_table"] = dict()
         data["creators"] = [self.request.user.id]
         data["name"] = data["name"][0]
+        data["problem"] = data["problem"][0]
         data["num_group"] = num_group
         data["start_submission_time"] = data["start_submission_time"][0]
         data["end_submission_time"] = data["end_submission_time"][0]
@@ -503,6 +508,7 @@ class ListCreateTournamentGroupAPI(generics.ListCreateAPIView):
                     num_match=num_match,
                     group=group,
                     tournament=None,
+                    challenge=None,
                 )
         return group
 
@@ -704,12 +710,15 @@ class RetrieveGroupAPI(generics.RetrieveAPIView):
                 status=status.HTTP_403_FORBIDDEN,
             )
         rounds = group.round_set.all()
-        rounds_serializer = RoundSerializer(rounds, many=True)
+        rounds_serializer = RoundSerializer(rounds, many=True).data
+        for index in range(len(rounds)):
+            rounds_serializer[index]["first_user"] = rounds[index].first_user.first_name
+            rounds_serializer[index]["second_user"] = rounds[index].second_user.first_name
         return JsonResponse(
             {
                 "group": GroupSerializer(group).data,
                 "summary": group_summary(group),
-                "rounds": rounds_serializer.data,
+                "rounds": rounds_serializer,
             },
             status=status.HTTP_200_OK,
         )
@@ -735,26 +744,27 @@ class RetrieveTournamentParticipantAPI(generics.RetrieveAPIView):
                 continue
             query = Q(first_user=self.request.user) & Q(second_user=participants[index])
             challenges = Challenge.objects.filter(query)
-            found_challenge = False
+            target_challenge = None
             for challenge in challenges:
-                if challenge.status == Challenge.ChallengeStatus.REQUEST:
-                    user_serializer[index]["challenge"] = ChallengeSerializer(
-                        challenge
-                    ).data
-                    found_challenge = True
+                if challenge.status == Challenge.ChallengeStatus.REQUEST or challenge.status == Challenge.ChallengeStatus.IN_PROGRESS:
+                    target_challenge = challenge
                     break
-            if not found_challenge:
+            if target_challenge is None:
+                query = Q(first_user=participants[index]) & Q(second_user=self.request.user)
+                challenges = Challenge.objects.filter(query)
+                for challenge in challenges:
+                    if challenge.status == Challenge.ChallengeStatus.REQUEST or challenge.status == Challenge.ChallengeStatus.IN_PROGRESS:
+                        target_challenge = challenge
+                        break
+            if target_challenge is None:
                 continue
-            query = Q(first_user=participants[index]) & Q(second_user=self.request.user)
-            challenges = Challenge.objects.filter(query)
-            for challenge in challenges:
-                if challenge.status == Challenge.ChallengeStatus.REQUEST:
-                    user_serializer[index]["challenge"] = ChallengeSerializer(
-                        challenge
-                    ).data
-                    found_challenge = True
-                    break
-
+            challenge_data = ChallengeSerializer(
+                target_challenge
+            ).data
+            if target_challenge.status == Challenge.ChallengeStatus.IN_PROGRESS:
+                round = Round.objects.get(challenge=target_challenge)
+                challenge_data["round"] = round.pk
+            user_serializer[index]["challenge"] = challenge_data
         return JsonResponse(
             {"participants": user_serializer},
             status=status.HTTP_200_OK,
@@ -781,6 +791,7 @@ class ListCreateRoundAPI(generics.ListCreateAPIView):
             num_match=int(data["num_match"]),
             group=None,
             tournament=None,
+            challenge=None,
         )
         return JsonResponse(
             {
@@ -791,10 +802,13 @@ class ListCreateRoundAPI(generics.ListCreateAPIView):
         )
 
     def get(self, request, *args, **kwargs):
-        rounds = Round.objects.all()
-        rounds_serializer = RoundSerializer(rounds, many=True)
+        rounds = Round.objects.all().order_by("-id")
+        rounds_data = RoundSerializer(rounds, many=True).data
+        for index in range(len(rounds)):
+            rounds_data[index]["first_user"] = UserSerializer(rounds[index].first_user).data
+            rounds_data[index]["second_user"] = UserSerializer(rounds[index].second_user).data
         return JsonResponse(
-            {"rounds": rounds_serializer.data}, status=status.HTTP_200_OK
+            {"rounds": rounds_data}, status=status.HTTP_200_OK
         )
 
 
@@ -906,12 +920,12 @@ class ListCreateChallengeAPI(generics.ListCreateAPIView):
                 {"message": "you can't challenge yourself"},
                 status=status.HTTP_403_FORBIDDEN,
             )
-        if get_last_submission(self.request.user, problem):
+        if get_last_submission(self.request.user, problem) is None:
             return JsonResponse(
                 {"message": f"you have no submission of problem {problem.id}"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
-        if get_last_submission(second_user, problem):
+        if get_last_submission(second_user, problem) is None:
             return JsonResponse(
                 {
                     "message": f"user {second_user.first_name} have no submission of problem {problem.id}"
@@ -967,7 +981,7 @@ class UpdateChallengeAPI(generics.UpdateAPIView):
                     status=status.HTTP_200_OK,
                 )
             if request.data["status"] == "ACCEPT":
-                challenge.status = Challenge.ChallengeStatus.ACCEPT
+                challenge.status = Challenge.ChallengeStatus.IN_PROGRESS
                 challenge.save()
                 round = create_round(
                     first_user=challenge.first_user,
@@ -976,6 +990,7 @@ class UpdateChallengeAPI(generics.UpdateAPIView):
                     num_match=3,
                     group=None,
                     tournament=None,
+                    challenge=challenge
                 )
                 return JsonResponse(
                     {
