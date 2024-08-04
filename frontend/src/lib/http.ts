@@ -1,5 +1,6 @@
 import { LoginResType } from '@/schema/user';
 import { normalizePath } from './utils';
+import { MessageType } from '@/schema/common';
 
 const AUTHENTICATION_ERROR_STATUS = 401;
 
@@ -7,6 +8,16 @@ type CustomOptions = Omit<RequestInit, 'method'> & {
   baseUrl?: string | undefined;
 };
 
+export class HttpError extends Error {
+  message: string;
+
+  constructor({ message }: MessageType) {
+    super('Http Error');
+    this.message = message;
+  }
+}
+
+let clientLogoutRequest: null | Promise<any> = null;
 export const isClient = () => typeof window !== 'undefined';
 
 const request = async <Response>(
@@ -60,6 +71,30 @@ const request = async <Response>(
   // Interceptor
   if (!res.ok) {
     if (res.status === AUTHENTICATION_ERROR_STATUS) {
+      console.log('Authentication error');
+
+      if (isClient()) {
+        if (!clientLogoutRequest) {
+          clientLogoutRequest = fetch('/api/auth/logout', {
+            method: 'POST',
+            headers: {
+              ...baseHeaders,
+            } as any,
+          });
+          try {
+            await clientLogoutRequest;
+          } catch (error) {
+          } finally {
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            clientLogoutRequest = null;
+            location.href = '/login';
+          }
+        }
+      } else {
+      }
+    } else {
+      throw new HttpError(data as MessageType);
     }
   }
 
@@ -69,7 +104,6 @@ const request = async <Response>(
       localStorage.setItem('token', token);
     } else if ('api/logout/' === normalizePath(url)) {
       localStorage.removeItem('token');
-      // localStorage.removeItem('user');
     }
   }
 

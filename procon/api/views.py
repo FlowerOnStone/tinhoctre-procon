@@ -376,15 +376,11 @@ class SubmitProblemAPI(generics.CreateAPIView):
     def post(self, request, *args, **kwargs):
         data = dict()
         problem = get_object_or_404(Problem, slug=kwargs.get("problem_slug"))
-        if problem.public_visible == False:
-            if (
-                not self.request.user.is_superuser
-                and self.request.user not in problem.creator.all()
-            ):
-                return JsonResponse(
-                    {"message": "You do not have permission to submit this problem!"},
-                    status=status.HTTP_403_FORBIDDEN,
-                )
+        if check_view_problem_permission(self.request.user, problem) is False:
+            return JsonResponse(
+                {"message": "You do not have permission to submit this problem!"},
+                status=status.HTTP_403_FORBIDDEN,
+            )
 
         data["problem"] = problem.id
         data["user"] = self.request.user.id
@@ -407,17 +403,13 @@ class ListProblemSubmissionAPI(generics.ListAPIView):
 
     def get(self, request, *args, **kwargs):
         problem = get_object_or_404(Problem, slug=kwargs.get("problem_slug"))
-        if problem.public_visible == False:
-            if (
-                not self.request.user.is_superuser
-                and self.request.user not in problem.creator.all()
-            ):
-                return JsonResponse(
-                    {
-                        "message": "You do not have permission to view submission of this problem!"
-                    },
-                    status=status.HTTP_403_FORBIDDEN,
-                )
+        if check_view_problem_permission(self.request.user, problem) is False:
+            return JsonResponse(
+                {
+                    "message": "You do not have permission to view submission of this problem!"
+                },
+                status=status.HTTP_403_FORBIDDEN,
+            )
 
         submissions = Submission.objects.filter(problem=problem)
         submissions_serializer = ListSubmissionSerializer(submissions, many=True)
@@ -527,6 +519,7 @@ class ListCreateTournamentGroupAPI(generics.ListCreateAPIView):
                 "right_player": bracket_seed[right],
                 "left_score": -1,
                 "right_score": -1,
+                "num_match": num_match[level],
                 "round": -1,
                 "knockout": 2 ** (level + 1),
             }
@@ -540,6 +533,7 @@ class ListCreateTournamentGroupAPI(generics.ListCreateAPIView):
             "right_player": "N/A",
             "left_score": -1,
             "right_score": -1,
+            "num_match": num_match[level],
             "round": -1,
             "knockout": 2 ** (level + 1),
         }
@@ -560,11 +554,7 @@ class ListCreateTournamentGroupAPI(generics.ListCreateAPIView):
 
     def get(self, request, *args, **kwargs):
         tournament = Tournament.objects.get(id=kwargs.get("id"))
-        if (
-            not self.request.user.is_superuser
-            and self.request.user not in tournament.creators.all()
-            and self.request.user not in tournament.participants.all()
-        ):
+        if check_view_tournament_permission(self.request.user, tournament) is False:
             return JsonResponse(
                 {
                     "message": "you don't have permission to view groups of this tournament"
@@ -666,11 +656,7 @@ class RetrieveTournamentAPI(generics.RetrieveAPIView):
 
     def get(self, request, *args, **kwargs):
         tournament = get_object_or_404(Tournament, pk=kwargs.get("id"))
-        if (
-            not self.request.user.is_superuser
-            and self.request.user not in tournament.creators.all()
-            and self.request.user not in tournament.participants.all()
-        ):
+        if check_view_tournament_permission(self.request.user, tournament) is False:
             return JsonResponse(
                 {"message": "you don't have permission to view this tournament"},
                 status=status.HTTP_403_FORBIDDEN,
@@ -690,11 +676,7 @@ class RetrieveTournamentProblemAPI(generics.RetrieveAPIView):
 
     def get(self, request, *args, **kwargs):
         tournament = get_object_or_404(Tournament, pk=kwargs.get("id"))
-        if (
-            not self.request.user.is_superuser
-            and self.request.user not in tournament.creators.all()
-            and self.request.user not in tournament.participants.all()
-        ):
+        if check_view_tournament_permission(self.request.user, tournament) is False:
             return JsonResponse(
                 {
                     "message": "you don't have permission to view problem of this tournament"
@@ -715,11 +697,8 @@ class RetrieveGroupAPI(generics.RetrieveAPIView):
 
     def get(self, request, *args, **kwargs):
         group = Group.objects.get(pk=kwargs.get("id"))
-        if (
-            not self.request.user.is_superuser
-            and self.request.user not in group.tournament.creators.all()
-            and self.request.user not in group.tournament.participants.all()
-        ):
+        tournament = group.tournament
+        if check_view_tournament_permission(self.request.user, tournament) is False:
             return JsonResponse(
                 {"message": "you don't have permission to view rounds of this group"},
                 status=status.HTTP_403_FORBIDDEN,
@@ -743,18 +722,41 @@ class RetrieveTournamentParticipantAPI(generics.RetrieveAPIView):
 
     def get(self, request, *args, **kwargs):
         tournament = get_object_or_404(Tournament, pk=kwargs.get("id"))
-        if (
-            not self.request.user.is_superuser
-            and self.request.user not in tournament.creators.all()
-            and self.request.user not in tournament.participants.all()
-        ):
+        if check_view_tournament_permission(self.request.user, tournament):
             return JsonResponse(
-                {"message": "you don't have permission to view problem of this group"},
+                {"message": "you don't have permission to view participant of this tournament"},
                 status=status.HTTP_403_FORBIDDEN,
             )
-        user_serializer = UserSerializer(tournament.participants.all(), many=True)
+        participants = tournament.participants.all()
+        user_serializer = UserSerializer(participants, many=True).data
+        for index in range(len(participants)):
+            user_serializer[index]["challenge"] = None
+            if participants[index] == self.request.user:
+                continue
+            query = Q(first_user=self.request.user) & Q(second_user=participants[index])
+            challenges = Challenge.objects.filter(query)
+            found_challenge = False
+            for challenge in challenges:
+                if challenge.status == Challenge.ChallengeStatus.REQUEST:
+                    user_serializer[index]["challenge"] = ChallengeSerializer(
+                        challenge
+                    ).data
+                    found_challenge = True
+                    break
+            if not found_challenge:
+                continue
+            query = Q(first_user=participants[index]) & Q(second_user=self.request.user)
+            challenges = Challenge.objects.filter(query)
+            for challenge in challenges:
+                if challenge.status == Challenge.ChallengeStatus.REQUEST:
+                    user_serializer[index]["challenge"] = ChallengeSerializer(
+                        challenge
+                    ).data
+                    found_challenge = True
+                    break
+
         return JsonResponse(
-            {"participants": user_serializer.data},
+            {"participants": user_serializer},
             status=status.HTTP_200_OK,
         )
 
@@ -833,11 +835,7 @@ class CreateMatchAPI(generics.ListCreateAPIView):
 
     def create(self, request, *args, **kwargs):
         round = get_object_or_404(Round, pk=kwargs.get("id"))
-        if (
-            not self.request.user.is_superuser
-            and self.request.user != round.first_user
-            and self.request.user != round.second_user
-        ):
+        if check_create_match_permission(self.request.user, round) is False:
             return JsonResponse(
                 {"message": "you don't have permission to create match"},
                 status=status.HTTP_403_FORBIDDEN,
@@ -890,43 +888,33 @@ class ListCreateChallengeAPI(generics.ListCreateAPIView):
         if self.request.user.is_superuser:
             challenges = Challenge.objects.all()
         else:
-            challenges = Challenge.objects.filter(
-                Q(first_user=self.request.user) | Q(second_user=self.request.user)
-            )
+            query = Q(first_user=self.request.user) | Q(second_user=self.request.user)
+            challenges = Challenge.objects.filter(query)
         serializer = ChallengeSerializer(challenges, many=True)
         return JsonResponse({"challenges": serializer.data}, status=status.HTTP_200_OK)
 
     def create(self, request, *args, **kwargs):
         problem = get_object_or_404(Problem, pk=self.request.data["problem"])
-        second_user = get_object_or_404(User, pk=self.request.data["user"])
-        if self.request.user == second_user:
-            JsonResponse(
-                {
-                    "message": "you can't challenge yourself",
-                },
+        if check_create_challenge_permission(self.request.user, problem) is False:
+            return JsonResponse(
+                {"message": "you don't have permission to create challenge"},
                 status=status.HTTP_403_FORBIDDEN,
             )
-        if (
-            len(
-                Submission.objects.filter(
-                    Q(user=self.request.user) & Q(problem=problem)
-                )
+        second_user = get_object_or_404(User, pk=self.request.data["user"])
+        if self.request.user == second_user:
+            return JsonResponse(
+                {"message": "you can't challenge yourself"},
+                status=status.HTTP_403_FORBIDDEN,
             )
-            == 0
-        ):
-            JsonResponse(
-                {
-                    "message": f"you have no submission of problem {problem.id}",
-                },
+        if get_last_submission(self.request.user, problem):
+            return JsonResponse(
+                {"message": f"you have no submission of problem {problem.id}"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
-        if (
-            len(Submission.objects.filter(Q(user=second_user) & Q(problem=problem)))
-            == 0
-        ):
-            JsonResponse(
+        if get_last_submission(second_user, problem):
+            return JsonResponse(
                 {
-                    "message": f"user {second_user.first_name} have no submission of problem {problem.id}",
+                    "message": f"user {second_user.first_name} have no submission of problem {problem.id}"
                 },
                 status=status.HTTP_400_BAD_REQUEST,
             )
@@ -998,8 +986,6 @@ class UpdateChallengeAPI(generics.UpdateAPIView):
                     status=status.HTTP_200_OK,
                 )
         return JsonResponse(
-            {
-                "message": "can't change this challenge",
-            },
+            {"message": "can't change this challenge"},
             status=status.HTTP_400_BAD_REQUEST,
         )

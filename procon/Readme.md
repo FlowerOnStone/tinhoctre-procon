@@ -28,3 +28,9 @@ python3 manage.py runserver
 
 TK: administrator
 MK: admin
+
+## Run workers
+
+```
+celery -A procon worker -l INFO
+```

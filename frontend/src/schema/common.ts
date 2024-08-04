@@ -20,3 +20,9 @@ export const ListProgrammingLanguage = z.array(
 );
 
 export type ListProgrammingLanguageType = z.infer<typeof ListProgrammingLanguage>;
+
+export const Message = z.object({
+  message: z.string(),
+});
+
+export type MessageType = z.infer<typeof Message>;

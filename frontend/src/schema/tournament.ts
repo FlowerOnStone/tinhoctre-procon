@@ -196,3 +196,29 @@ export const DetailTournamentRes = z.object({
 });
 
 export type DetailTournamentResType = z.infer<typeof DetailTournamentRes>;
+
+const isPowerOfTwo = (n: number): boolean => {
+  if (n <= 0) return false;
+  return (n & (n - 1)) === 0;
+};
+
+export const CreateTournamentForm = z.object({
+  name: z.string(),
+  num_group: z.coerce
+    .number()
+    .int()
+    .positive({
+      message: 'Số lượng nhóm phải là số nguyên dương',
+    })
+    .refine(isPowerOfTwo, {
+      message: 'Số lượng nhóm phải là lũy thừa của 2',
+    }),
+  participants: z.array(z.number()),
+  problem: z.number(),
+  start_submission_time: z.date(),
+  end_submission_time: z.date(),
+  start_combat_time: z.date(),
+  end_combat_time: z.date(),
+});
+
+export type CreateTournamentFormType = z.infer<typeof CreateTournamentForm>;

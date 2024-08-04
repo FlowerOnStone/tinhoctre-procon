@@ -27,4 +27,17 @@ export const ListProblemsRes = z.object({
 
 export type ListProblemsResType = z.infer<typeof ListProblemsRes>;
 
+<<<<<<< HEAD
 
+=======
+export const ProblemListRes = z.array(
+  z.object({
+    id: z.number(),
+    slug: z.string(),
+    name: z.string(),
+    public_visible: z.boolean(),
+  })
+);
+
+export type ProblemListResType = z.infer<typeof ProblemListRes>;
+>>>>>>> main

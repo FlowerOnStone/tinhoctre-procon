@@ -1,5 +1,5 @@
 import http from '@/lib/http';
-import { LoginBodyType, LoginResType, RegisterBodyType, RegisterResType } from '@/schema/user';
+import { LoginBodyType, LoginResType, RegisterBodyType, RegisterResType, UserListResType } from '@/schema/user';
 
 const userApiRequest = {
   login: (body: LoginBodyType) => http.post<LoginResType>('/api/login/', body),
@@ -9,6 +9,7 @@ const userApiRequest = {
     http.post('/api/auth', body, {
       baseUrl: '',
     }),
+  getListUser: () => http.get<UserListResType>('/api/user/list/'),
 };
 
 export default userApiRequest;

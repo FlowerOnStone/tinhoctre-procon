@@ -1,11 +1,11 @@
 'use client';
 
-import { User } from '@/schema/user';
+import { UserType } from '@/schema/user';
 import { createContext, useCallback, useContext, useEffect, useState } from 'react';
 
 const AppContext = createContext<{
-  user: User | null;
-  setUser: (user: User | null) => void;
+  user: UserType | null;
+  setUser: (user: UserType | null) => void;
 }>({
   user: null,
   setUser: () => {},
@@ -15,9 +15,9 @@ export const useAppContext = () => {
   return context;
 };
 export default function AppProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUserState] = useState<User | null>(null);
+  const [user, setUserState] = useState<UserType | null>(null);
   const setUser = useCallback(
-    (user: User | null) => {
+    (user: UserType | null) => {
       setUserState(user);
       localStorage.setItem('user', JSON.stringify(user));
     },

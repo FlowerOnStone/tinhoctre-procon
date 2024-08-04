@@ -68,7 +68,7 @@ export default function Header() {
                 </DropdownMenuItem>
                 <DropdownMenuItem>
                   <LogOut className="mr-2 h-4 w-4" />
-                  <Logout></Logout>
+                  <Logout />
                 </DropdownMenuItem>
               </DropdownMenuGroup>
             </DropdownMenuContent>
