@@ -3,6 +3,8 @@ import { Inter } from 'next/font/google';
 import './globals.css';
 import Header from '@/components/header';
 import AppProvider from './app-provider';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -26,6 +28,7 @@ export default function RootLayout({
             <div className="mx-auto max-w-screen-2xl w-full my-6">{children}</div>
           </main>
         </AppProvider>
+        <ToastContainer pauseOnHover={false} autoClose={2000} />
       </body>
     </html>
   );
