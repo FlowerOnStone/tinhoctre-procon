@@ -69,7 +69,15 @@ export const Participant = z.object({
   id: z.number(),
   username: z.string(),
   first_name: z.string(),
-});
+  challenge: z.object({
+    id: z.number(),
+    first_user : z.number(),
+    second_user : z.number(),
+    problem: z.number(),
+    status: z.string(),
+    round: z.number(),
+  })
+})
 
 export const ParticipantRes = z.object({
   participants: z.array(Participant),

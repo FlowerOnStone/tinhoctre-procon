@@ -14,7 +14,7 @@ export default function TournamentBracket({ id }: { id: string }) {
         
         // handle response
       } catch (error) {
-        alert('Failed to fetch tournament bracket');
+        console.log("Hiện tại chưa có bracket.")
       }
     }
 
@@ -143,12 +143,14 @@ export default function TournamentBracket({ id }: { id: string }) {
         if (rowIndex % 2 === 1) {
           return {
             player: node.left_player,
-            score: node.left_score === -1 ? '': node.left_score
+            score: node.left_score === -1 ? '': node.left_score,
+            round: node.round === -1 ? '': node.round
           };
         } else {
           return {
             player: node.right_player,
-            score: node.right_score === -1 ? '': node.right_score
+            score: node.right_score === -1 ? '': node.right_score,
+            round: node.round === -1 ? '': node.round
           }
         }
       }
@@ -156,7 +158,8 @@ export default function TournamentBracket({ id }: { id: string }) {
 
     return {
       player: 'N/A',
-      score: ''
+      score: '',
+      round: ''
     }; // Return undefined if no match is found
   };
 
@@ -164,7 +167,7 @@ export default function TournamentBracket({ id }: { id: string }) {
     <div>
       <h1 className="text-3xl mb-4 mt-8 font-bold">Vòng loại trực tiếp</h1>
       <div style={{backgroundColor: '#f1f5f9', padding: '30px 30px'}}>
-      <table style={{ width: "100%", borderCollapse: "collapse" }}>
+        {bracket === null ? <p style={{textAlign: 'center'}}>Hiện tại chưa có bảng vòng loại trực tiếp</p> : <table style={{ width: "100%", borderCollapse: "collapse" }}>
         <tbody>
           {rows.map((_, rowIndex) => (
             <tr key={rowIndex}>
@@ -189,7 +192,7 @@ export default function TournamentBracket({ id }: { id: string }) {
                       key={`${rowIndex}-${colIndex}`}
                       style={style || {}}
                     >
-                      <Link href={'/statusbar/'}>
+                      <Link href={`/round/${getMatch(rowIndex, colIndex).round}/`}>
                       <span>
                         {style.border !== ""  ? getMatch(rowIndex, colIndex).player : ""}
                       </span>
@@ -205,7 +208,8 @@ export default function TournamentBracket({ id }: { id: string }) {
             </tr>
           ))}
         </tbody>
-      </table>
+      </table>}
+      
       </div>
     </div>
   );

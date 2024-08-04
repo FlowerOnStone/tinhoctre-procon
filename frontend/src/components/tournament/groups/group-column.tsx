@@ -65,10 +65,5 @@ export const groupColumns: ColumnDef<UserInGroupType>[] = [
     cell: ({ row }) => {
       return <div className="text-right font-medium">{row.getValue('point')}</div>;
     },
-  },
-  {
-    accessorKey: 'num_round',
-    header: 'Số vòng',
-    cell: ({ row }) => <div className="text-right">{row.getValue('num_round')}</div>,
-  },
+  }
 ];

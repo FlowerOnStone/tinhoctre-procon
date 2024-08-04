@@ -24,12 +24,9 @@ export default function StatusBar({ id }: { id: string }) {
         setMatch(matchRes);
 
         // Set initial score based on the last value in player_1_points and player_2_points
-        const player1Points = matchRes.match.history.player_1_points;
-        const player2Points = matchRes.match.history.player_2_points;
 
-        const latestPlayer1Score = player1Points[player1Points.length - 1];
-        const latestPlayer2Score = player2Points[player2Points.length - 1];
-        
+        const latestPlayer1Score = 0
+        const latestPlayer2Score = 0
         setScore([latestPlayer1Score, latestPlayer2Score]);
         setWidth(getWidth([latestPlayer1Score, latestPlayer2Score]));
 
@@ -136,7 +133,7 @@ export default function StatusBar({ id }: { id: string }) {
 
         <div style={{ width: '100%', backgroundColor: '#424243', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', height: '4vh' }}>
           <div style={{ display: 'flex' }}>
-            <button onClick={revertScore} style={{ marginRight: '1rem' }}>
+            {/* <button onClick={revertScore} style={{ marginRight: '1rem' }}>
               <p style={{ color: '#ffffff', fontSize: '1.7vh' }}>Revert</p>
             </button>
             <button onClick={togglePlayPause} style={{ marginRight: '1rem' }}>
@@ -144,7 +141,7 @@ export default function StatusBar({ id }: { id: string }) {
             </button>
             <button onClick={changeScore}>
               <p style={{ color: '#ffffff', fontSize: '1.7vh' }}>Update</p>
-            </button>
+            </button> */}
           </div>
         </div>
       </div>
