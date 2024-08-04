@@ -23,7 +23,7 @@ export function ScoreTable({ data }: ScoreTableProps) {
       <Table>
         <TableBody>
           {data.rounds.map((match, index) => (
-          <Link href={`/statusbar/${match.id}/`} passHref>
+          <Link href={`/round/${match.id}/`} passHref>
             <div>
               <TableRow key={match.id} className="cursor-pointer hover:bg-[#14518B] transition duration-300 text-black hover:text-white flex">
                 <TableCell
