@@ -189,7 +189,7 @@ export default function TournamentBracket({ id }: { id: string }) {
                       key={`${rowIndex}-${colIndex}`}
                       style={style || {}}
                     >
-                      <Link href={'/statusbar/'}>
+                      <Link href={`/match/${id}/`}>
                       <span>
                         {style.border !== ""  ? getMatch(rowIndex, colIndex).player : ""}
                       </span>

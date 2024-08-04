@@ -20,6 +20,6 @@ export default function Participants({ id }: { id: string }) {
     fetchRequest();
   }, [id])
 
-  return <DataTable data={participants?.participants || []} columns={participantColumns} />;
+  return <DataTable showPagination showSearch showColumnVisibility data={participants?.participants || []} columns={participantColumns} />;
 
 }
