@@ -1,6 +1,6 @@
 from .models import *
 from .serializers import *
-
+from datetime import datetime
 
 def log_2(x):
     cnt = 0
@@ -105,3 +105,56 @@ def serialize_bracket(bracket):
         bracket["nodes"][id]["right_player"] = serialize_id(
             bracket["nodes"][id]["right_player"]
         )
+
+
+
+def current_time_in_range(start, end):
+    return start <= datetime.now() and datetime.now() <= end
+
+
+def check_view_problem_permission(user: User, problem: Problem) -> bool:
+    if problem.public_visible:
+        return True
+    if user.is_superuser:
+        return True
+    if user in problem.creator.all():
+        return True
+    tournaments = Tournament.objects.all()
+    for tournament in tournaments:
+        if tournament.problem == problem and user in tournament.participants.all():
+            if current_time_in_range(tournament.start_submission_time, tournament.end_submission_time):
+                return True
+            if current_time_in_range(tournament.start_combat_time, tournament.end_combat_time):
+                return True
+    return True
+
+
+def check_create_challenge_permission(user: User, problem: Problem):
+    if user.is_superuser:
+        return True
+    if user in problem.creator.all():
+        return True
+    tournaments = Tournament.objects.all()
+    for tournament in tournaments:
+        if tournament.problem == problem and user in tournament.creators.all():
+            if current_time_in_range(tournament.start_combat_time, tournament.end_combat_time):
+                return True
+    return False
+
+def check_create_match_permission(user: User, round: Round):
+    if user.is_superuser:
+        return True
+    if round.tournament is not None and round.group is not None:
+        return False
+    if round.first_user == user or round.second_user == user:
+        return True
+    return False
+
+def check_view_tournament_permission(user: User, tournament: Tournament):
+    if user.is_superuser:
+        return True
+    if user in tournament.creators.all():
+        return True
+    if tournament.participants.filter(pk=user.pk).exists() and datetime.now() >= tournament.start_submission_time:
+        return True
+    return False
