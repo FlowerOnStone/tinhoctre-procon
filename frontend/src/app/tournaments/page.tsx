@@ -7,6 +7,7 @@ import React from 'react';
 
 export default async function TournamentsPage({ searchParams }: { searchParams: { name: string; orderBy: string } }) {
   const { tournaments } = await tournamentApiRequest.getListTournament();
+  console.log(tournaments)
 
   let filteredTournaments = tournaments;
   if (searchParams.name) {

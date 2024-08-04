@@ -22,3 +22,21 @@ export function formatDateTime(isoString: string | undefined): string {
     return 'Invalid date';
   }
 }
+
+export function calculateTimeInSeconds(isoString1: string | undefined | null, isoString2: string | undefined | null): number {
+  if (!isoString2 || !isoString1) {
+    console.error('Invalid date string');
+    return -1; 
+  }
+  
+  try {
+    const date1 = parseISO(isoString1)
+    const date2 = parseISO(isoString2);
+    const now = new Date();
+    const diffInSeconds = Math.floor((date2.getTime() - date1.getTime()) / 1000);
+    return diffInSeconds;
+  } catch (error) {
+    console.error('Error parsing date:', error);
+    return -1; 
+  }
+}
