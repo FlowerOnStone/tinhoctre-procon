@@ -45,12 +45,9 @@ DEBUG = True
 ALLOWED_HOSTS = ["*"]
 
 CORS_ALLOWED_ORIGINS = [
-   "http://localhost:3000",
-]
-
-CORS_ALLOW_CREDENTIALS = True
-CORS_ALLOWED_ORIGINS = [
-   "http://localhost:3000",
+    "http://localhost:3000",
+    "https://apiprocon.tinhoctre.vn",
+    "https://procon.tinhoctre.vn",
 ]
 
 CORS_ALLOW_CREDENTIALS = True
