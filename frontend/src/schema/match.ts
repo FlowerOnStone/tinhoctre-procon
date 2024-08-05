@@ -15,6 +15,9 @@ export const Match = z.object({
     }),
     first_score: z.number(),
     second_score: z.number(),
+
+    first_name: z.string(),
+    second_name: z.string(),
   }),
 });
 

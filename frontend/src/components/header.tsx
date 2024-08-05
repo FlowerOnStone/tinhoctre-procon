@@ -15,6 +15,7 @@ import {
 import { Button } from './ui/button';
 import { LogOut, User } from 'lucide-react';
 import { Logout } from '@/components/logout';
+import Logo from './logo/logo';
 
 const userRoutes = [
   { name: 'Logo', href: '/' },
@@ -38,18 +39,29 @@ export default function Header() {
   return (
     <header className="fixed top-0 w-full flex justify-center bg-[#15518B] z-30 transition-all text-white">
       <div className="flex h-16 max-w-screen-2xl items-center justify-between w-full mx-[50px]">
-        <div className="flex gap-5">
-          {routes.map((route) => {
+        <div className="flex gap-5 items-center justify-between">
+        {routes.map((route) => {
+          if (route.name === 'Logo') {
             return (
               <Link
                 key={route.href}
                 href={route.href}
-                className="font-display text-xl hover:font-semibold transition duration-300"
+                className="hover:bg-white p-2 transition duration-300"
               >
-                {route.name}
+                <Logo />
               </Link>
             );
-          })}
+          }
+          return (
+            <Link
+              key={route.href}
+              href={route.href}
+              className="font-display text-xl hover:font-semibold transition duration-300"
+            >
+              {route.name}
+            </Link>
+          );
+        })}
           {user?.is_admin && <AdminDropdown />}
         </div>
         {user ? (
