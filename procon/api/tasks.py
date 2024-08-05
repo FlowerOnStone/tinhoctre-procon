@@ -424,7 +424,7 @@ def update_group(group: Group):
         )
         for participant in result
     ]
-    result.sort()
+    result.sort(reverse=True)
     tournament = group.tournament
     bracket = tournament.tournament_table
     update_bracket_leaf(bracket, group, result)
@@ -441,7 +441,7 @@ def update_tournament_round(round: Round):
             node["left_score"] = round.first_score
             node["right_score"] = round.second_score
             if node["parent"] != -1:
-                parent = bracket["nodes"]["id"][str(node["parent"])]
+                parent = bracket["nodes"][str(node["parent"])]
                 winner_id = round.first_user.id
                 if round.status == Round.RoundStatus.SECOND_WIN:
                     winner_id = round.second_user.id
@@ -472,6 +472,7 @@ def update_challenge(round: Round):
     challenge.status = Challenge.ChallengeStatus.DONE
     challenge.save()
 
+
 def update_round(match: Match):
     round = match.round
     first_score = 0
@@ -493,7 +494,7 @@ def update_round(match: Match):
     if len(round.match_set.all()) == round.num_match:
         if round.first_score == round.second_score:
             round.status = Round.RoundStatus.DRAW
-        elif round.first_score == round.second_score:
+        elif round.first_score > round.second_score:
             round.status = Round.RoundStatus.FIRST_WIN
         else:
             round.status = Round.RoundStatus.SECOND_WIN
@@ -504,6 +505,7 @@ def update_round(match: Match):
             update_tournament_round(round)
         if round.challenge is not None:
             update_challenge(round)
+
 
 def start_group(group: Group):
     if group.status == Group.GroupStatus.NOT_STARTED:
