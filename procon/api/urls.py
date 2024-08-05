@@ -28,9 +28,14 @@ urlpatterns = [
         name="view_change_delete_problem",
     ),  # tested
     path(
-        "problem/<slug:problem_slug>/testcase/",
-        RetrieveUpdateDestroyTestcaseAPI.as_view(),
-        name="view_change_delete_problem_testcase",
+        "problem/<slug:problem_slug>/testdata/",
+        RetrieveUpdateTestdataAPI.as_view(),
+        name="view_change_delete_problem_testdata",
+    ),
+    path(
+        "problem/<slug:problem_slug>/defaultsubmission/",
+        RetrieveUpdateDefaultSubmissionAPI.as_view(),
+        name="view_change_delete_problem_defaultsubmission",
     ),
     path(
         "submission/",
@@ -60,13 +65,23 @@ urlpatterns = [
     ),
     path(
         "tournament/<int:id>/group/",
-        RetrieveTouramentGroupAPI.as_view(),
+        ListCreateTournamentGroupAPI.as_view(),
         name="view_tournament_group",
     ),
     path(
+        "tournament/<int:id>/problem/",
+        RetrieveTournamentProblemAPI.as_view(),
+        name="view_tournament_problem",
+    ),
+    path(
+        "tournament/<int:id>/participants/",
+        RetrieveTournamentParticipantAPI.as_view(),
+        name="view_tournament_problem",
+    ),
+    path(
         "group/<int:id>/",
-        RetrieveGroupRoundAPI.as_view(),
-        name="view_group_round",
+        RetrieveGroupAPI.as_view(),
+        name="view_group",
     ),
     path(
         "round/",
@@ -74,13 +89,24 @@ urlpatterns = [
         name="list_create_round",
     ),
     path(
-        "round/<int:id>/match/",
-        ListCreateMatchAPI.as_view(),
+        "round/<int:id>/",
+        RetrieveRoundAPI.as_view(),
+        name="retrieve_round",
+    ),
+    path(
+        "round/<int:id>/create_match/",
+        CreateMatchAPI.as_view(),
         name="list_create_match",
     ),
     path(
         "match/<int:id>/",
         RetrieveMatchAPI.as_view(),
         name="retrieve_match",
+    ),
+    path("challenge/", ListCreateChallengeAPI.as_view(), name="list_create_challenge"),
+    path(
+        "challenge/<int:id>/",
+        UpdateChallengeAPI.as_view(),
+        name="update_challenge",
     ),
 ]

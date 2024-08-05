@@ -19,4 +19,4 @@ with open("init_database/timezones.csv", "r") as f:
             zone=zone, location=location, offset=offset, offset_dst=offset_dst
         )
         timezone.save()
-        print("add {zone}/{location}")
+        print(f"add {zone}/{location}")

@@ -2,26 +2,22 @@
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
-import { z } from 'zod';
-
 import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import Link from 'next/link';
 import { PasswordInput } from '@/components/password-input';
-
-const formSchema = z.object({
-  username: z.string().min(2, {
-    message: 'Username must be at least 2 characters.',
-  }),
-  password: z.string().min(8, {
-    message: 'Password must be at least 8 characters.',
-  }),
-});
+import { LoginBody, LoginBodyType } from '@/schema/user';
+import userApiRequest from '@/api/user';
+import { useRouter } from 'next/navigation';
+import { useAppContext } from '@/app/app-provider';
 
 export default function Login() {
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
+  const router = useRouter();
+  const { setUser } = useAppContext();
+
+  const form = useForm<LoginBodyType>({
+    resolver: zodResolver(LoginBody),
     defaultValues: {
       username: '',
       password: '',
@@ -29,24 +25,39 @@ export default function Login() {
   });
 
   // 2. Define a submit handler.
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log(values);
+  async function onSubmit(values: LoginBodyType) {
+    // console.log(values);
+
+    try {
+      const response = await userApiRequest.login(values);
+      await userApiRequest.auth({ token: response.token });
+
+      // add attribute to response.user
+      setUser(response.user);
+      router.push('/');
+      router.refresh();
+    } catch (error: any) {
+      console.error(error.response.data);
+      alert(error.response.data.message);
+    }
   }
 
   return (
-    <main className="w-full h-screen flex flex-col items-center justify-center px-24">
+    <div className="w-full h-screen flex flex-col items-center justify-center">
       <h1 className="text-3xl ">Đăng nhập</h1>
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8 w-1/3 p-12 bg-[#EEEEEE] m-12">
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8 w-2/5 p-12 bg-[#EEEEEE] m-12">
           <FormField
             control={form.control}
             name="username"
             render={({ field }) => (
-              <FormItem className="flex w-full items-center">
-                <FormLabel className="min-w-36 ">Tên đăng nhập</FormLabel>
-                <FormControl>
-                  <Input placeholder="Username" {...field} />
-                </FormControl>
+              <FormItem>
+                <div className="flex w-full items-center">
+                  <FormLabel className="min-w-36 ">Tên đăng nhập</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Username" {...field} />
+                  </FormControl>
+                </div>
                 <FormMessage />
               </FormItem>
             )}
@@ -55,16 +66,18 @@ export default function Login() {
             control={form.control}
             name="password"
             render={({ field }) => (
-              <FormItem className="flex w-full items-center">
-                <FormLabel className="min-w-36">Mật khẩu</FormLabel>
-                <FormControl>
-                  <PasswordInput placeholder="Password" {...field} />
-                </FormControl>
+              <FormItem>
+                <div className="flex w-full items-center">
+                  <FormLabel className="min-w-36">Mật khẩu</FormLabel>
+                  <FormControl>
+                    <PasswordInput placeholder="Password" {...field} />
+                  </FormControl>
+                </div>
                 <FormMessage />
               </FormItem>
             )}
           />
-          <div className="flex justify-center flex-col items-center gap-2">
+          <div className="flex justify-center flex-col items-center gap-1">
             <Button variant={'link'} className="p-0 text-[#14518B]" asChild>
               <Link href="forgot-password">Quên mật khẩu?</Link>
             </Button>
@@ -82,6 +95,6 @@ export default function Login() {
           </div>
         </form>
       </Form>
-    </main>
+    </div>
   );
 }

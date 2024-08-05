@@ -114,17 +114,22 @@ class ProblemSerializer(serializers.ModelSerializer):
         return super().update(instance, validated_data)
 
 
+class TestDataSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TestData
+        fields = ("id", "type", "test_data", "referee", "seed_generator", "generator")
+
+
 class ListSubmissionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Submission
         fields = (
+            "id",
+            "submission_time",
             "user",
             "problem",
             "language",
             "status",
-            "total_point",
-            "time",
-            "memory",
         )
 
 
@@ -135,7 +140,7 @@ class CreateSubmissionSerializer(serializers.ModelSerializer):
             "user",
             "problem",
             "language",
-            "code",
+            "source",
         )
 
 
@@ -147,11 +152,18 @@ class SubmissionSerializer(serializers.ModelSerializer):
             "problem",
             "submission_time",
             "language",
-            "code",
+            "source",
             "status",
-            "total_point",
-            "time",
-            "memory",
+            "log",
+        )
+
+
+class DefaultSubmissionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = DefaultSubmission
+        fields = (
+            "problem",
+            "submission",
         )
 
 
@@ -174,6 +186,7 @@ class TournamentSerializer(serializers.ModelSerializer):
             "participants",
             "tournament_table",
             "num_group",
+            "problem",
             "start_submission_time",
             "end_submission_time",
             "start_combat_time",
@@ -184,7 +197,7 @@ class TournamentSerializer(serializers.ModelSerializer):
 class GroupSerializer(serializers.ModelSerializer):
     class Meta:
         model = Group
-        fields = ("id", "tournament", "participants",  "status")
+        fields = ("id", "tournament", "index", "participants", "status")
 
 
 class RoundSerializer(serializers.ModelSerializer):
@@ -199,6 +212,9 @@ class RoundSerializer(serializers.ModelSerializer):
             "first_submission",
             "second_submission",
             "num_match",
+            "first_score",
+            "second_score",
+            "status",
         )
 
 
@@ -208,9 +224,16 @@ class MatchSerializer(serializers.ModelSerializer):
         fields = (
             "id",
             "round",
+            "type",
             "testcase",
             "status",
             "history",
             "first_score",
             "second_score",
         )
+
+
+class ChallengeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Challenge
+        fields = ("id", "first_user", "second_user", "problem", "status")

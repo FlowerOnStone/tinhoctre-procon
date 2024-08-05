@@ -1,34 +1,25 @@
-'use client';
-import React, { useState } from 'react';
-
 import { ColumnDef } from '@tanstack/react-table';
+import { SubmissionStatus, SubmissionType } from '@/schema/submission';
 
-export type Submit = {
-  id: string;
-  name: string;
-  grade: string;
-  time: string;
-};
-
-export const submitColumns: ColumnDef<Submit>[] = [
+export const submitColumns: ColumnDef<SubmissionType>[] = [
   {
     accessorKey: 'id',
     header: 'Thứ tự',
     cell: ({ row }) => <div className="capitalize">{row.getValue('id')}</div>,
   },
   {
-    accessorKey: 'name',
-    header: 'Họ và tên',
-    cell: ({ row }) => <div className="capitalize">{row.getValue('name')}</div>,
+    accessorKey: 'user',
+    header: 'Thí sinh',
+    cell: ({ row }) => <div className="capitalize">{row.getValue('user')}</div>,
   },
   {
-    accessorKey: 'grade',
-    header: 'Điểm',
-    cell: ({ row }) => <div className="capitalize">{row.getValue('grade')}</div>,
+    accessorKey: 'language',
+    header: 'Ngôn ngữ',
+    cell: ({ row }) => <div className="capitalize">{row.getValue('language')}</div>,
   },
   {
-    accessorKey: 'time',
-    header: 'Thời gian',
-    cell: ({ row }) => <div>{row.getValue('time')}</div>,
+    accessorKey: 'status',
+    header: 'Trạng thái',
+    cell: ({ row }) => <div>{SubmissionStatus[row.getValue('status') as keyof typeof SubmissionStatus]}</div>,
   },
 ];

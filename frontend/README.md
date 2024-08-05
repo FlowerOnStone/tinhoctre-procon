@@ -8,6 +8,7 @@ tinhoctre procon
 
 ```bash
 npm install
+cp .env.example .env.local
 ```
 
 First, run the development server:
