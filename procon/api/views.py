@@ -832,11 +832,18 @@ class RetrieveRoundAPI(generics.RetrieveAPIView):
         round_data = RoundSerializer(round).data
         round_data["first_user"] = UserSerializer(round.first_user).data
         round_data["second_user"] = UserSerializer(round.second_user).data
-        matchs_serializer = MatchSerializer(matchs, many=True)
+        matchs_data = MatchSerializer(matchs, many=True).data
+        for index in range(len(matchs)):
+            if matchs[index].type == 1:
+                matchs_data[index]["first_user"] = round.first_user.first_name
+                matchs_data[index]["second_user"] = round.second_user.first_name
+            else:
+                matchs_data[index]["first_user"] = round.second_user.first_name
+                matchs_data[index]["second_user"] = round.first_user.first_name
         return JsonResponse(
             {
                 "round": round_data,
-                "matchs": matchs_serializer.data,
+                "matchs": matchs_data,
             },
             status=status.HTTP_200_OK,
         )
@@ -888,8 +895,14 @@ class RetrieveMatchAPI(generics.RetrieveAPIView):
                 {"message": "you don't have permission to view this match"},
                 status=status.HTTP_403_FORBIDDEN,
             )
-        match_serializer = MatchSerializer(match)
-        return JsonResponse({"match": match_serializer.data}, status=status.HTTP_200_OK)
+        match_data = MatchSerializer(match).data
+        if match.type == 1:
+            match_data["first_user"] = match.round.first_user.first_name
+            match_data["second_user"] = match.round.second_user.first_name
+        else:
+            match_data["first_user"] = match.round.second_user.first_name
+            match_data["second_user"] = match.round.first_user.first_name
+        return JsonResponse({"match": match_data}, status=status.HTTP_200_OK)
 
 
 class ListCreateChallengeAPI(generics.ListCreateAPIView):
