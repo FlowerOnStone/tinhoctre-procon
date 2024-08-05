@@ -123,7 +123,7 @@ export default function StatusBar({ id }: { id: string }) {
         }}
       >
         <div style={{ display: 'flex', alignItems: 'center', margin: '2vh 0' }}>
-          <Avatar />
+          <span>{match?.match.first_name}</span>
 
           <div
             style={{
@@ -152,7 +152,7 @@ export default function StatusBar({ id }: { id: string }) {
             <strong style={{ color: '#ffffff', marginRight: '1.5vh', fontSize: '1.7vh' }}>{score[1]}</strong>
           </div>
 
-          <Avatar />
+          <span>{match?.match.second_name}</span>
         </div>
 
         <div
