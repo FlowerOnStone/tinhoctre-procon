@@ -50,6 +50,12 @@ CORS_ALLOWED_ORIGINS = [
     "https://procon.tinhoctre.vn",
 ]
 
+CSRF_TRUSTED_ORIGINS = [
+    "https://apiprocon.tinhoctre.vn",
+    "https://procon.tinhoctre.vn",
+]
+
+
 CORS_ALLOW_CREDENTIALS = True
 
 # Application definition
