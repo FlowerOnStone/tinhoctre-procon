@@ -140,7 +140,7 @@ export default function TournamentBracket({ id }: { id: string }) {
       const node = bracket?.tournament?.tournament_table?.nodes[Math.round((rowIndex + 1) / 2).toString() as keyof typeof bracket.tournament.tournament_table.nodes];
 
       if (node) {
-        if (rowIndex % 2 === 1) {
+        if (rowIndex % 2 === 0) {
           return {
             player: node.left_player,
             score: node.left_score === -1 ? '': node.left_score,
