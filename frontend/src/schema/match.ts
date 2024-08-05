@@ -62,6 +62,8 @@ export const Round = z.object({
       }),
       first_score: z.number(),
       second_score: z.number(),
+      first_user: z.string(),
+      second_user: z.string(),
     })
   ),
 });

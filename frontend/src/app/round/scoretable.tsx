@@ -37,7 +37,7 @@ export function ScoreTable({ data }: ScoreTableProps) {
                         : "text-gray-400 hover:text-white"
                     } ${match.status === "F" ? "hover:font-bold" : ""} flex-1`}
                   >
-                    {data.round.first_user.first_name}
+                    {match.first_user}
                   </TableCell>
                   <TableCell className="text-center hover:text-white flex-1">
                     {match.status === "N"
@@ -51,7 +51,7 @@ export function ScoreTable({ data }: ScoreTableProps) {
                         : "text-gray-400 hover:text-white"
                     } ${match.status === "S" ? "hover:font-bold" : ""} flex-1`}
                   >
-                    {data.round.second_user.first_name}
+                    {match.second_user}
                   </TableCell>
                 </TableRow>
               </div>
