@@ -5,9 +5,13 @@ import { RoundResType } from '@/schema/match';
 import matchApiRequest from '@/api/match';
 import { Table, TableBody, TableCell, TableRow } from '@/components/ui/table';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { Button } from '@/components/ui/button';
+import { ChevronLeft } from 'lucide-react';
 
 export default function RoundsPage() {
   const [rounds, setRounds] = useState<RoundResType[]>([]);
+  const route = useRouter();
 
   useEffect(() => {
     const fetchRequest = async () => {
@@ -28,32 +32,29 @@ export default function RoundsPage() {
         <Table>
           <TableBody>
             {rounds.map((round, index) => (
-              <Link key={index} href={`/round/${round.id}/`} passHref>
-                <div>
-                  <TableRow
-                    key={round.id}
-                    className="cursor-pointer hover:bg-[#14518B] transition duration-300 text-black hover:text-white flex"
-                  >
-                    <TableCell
-                      className={`${round.status === 'F' ? 'hover:text-white' : 'text-gray-400 hover:text-white'} ${
-                        round.status === 'F' ? 'hover:font-bold' : ''
-                      } flex-1`}
-                    >
-                      {round.first_user.first_name}
-                    </TableCell>
-                    <TableCell className="text-center hover:text-white flex-1">
-                      {round.status === 'N' ? 'Chưa thi đấu' : `${round.first_score} - ${round.second_score}`}
-                    </TableCell>
-                    <TableCell
-                      className={`text-right ${
-                        round.status === 'S' ? 'hover:text-white' : 'text-gray-400 hover:text-white'
-                      } ${round.status === 'S' ? 'hover:font-bold' : ''} flex-1`}
-                    >
-                      {round.second_user.first_name}
-                    </TableCell>
-                  </TableRow>
-                </div>
-              </Link>
+              <TableRow
+                key={round.id}
+                onClick={() => route.push(`/round/${round.id}/`)}
+                className="cursor-pointer hover:bg-[#14518B] transition duration-300 text-black hover:text-white flex"
+              >
+                <TableCell
+                  className={`${round.status === 'F' ? 'hover:text-white' : 'text-gray-400 hover:text-white'} ${
+                    round.status === 'F' ? 'hover:font-bold' : ''
+                  } flex-1`}
+                >
+                  {round.first_user.first_name}
+                </TableCell>
+                <TableCell className="text-center hover:text-white flex-1">
+                  {round.status === 'N' ? 'Chưa thi đấu' : `${round.first_score} - ${round.second_score}`}
+                </TableCell>
+                <TableCell
+                  className={`text-right ${
+                    round.status === 'S' ? 'hover:text-white' : 'text-gray-400 hover:text-white'
+                  } ${round.status === 'S' ? 'hover:font-bold' : ''} flex-1`}
+                >
+                  {round.second_user.first_name}
+                </TableCell>
+              </TableRow>
             ))}
           </TableBody>
         </Table>
