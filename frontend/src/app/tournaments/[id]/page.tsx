@@ -11,12 +11,18 @@ import { DetailTournamentResType } from '@/schema/tournament';
 import Groups from '@/components/tournament/groups/groups';
 import { calculateTimeInSeconds, formatDateTime } from '@/lib/utils';
 import Timer from '@/components/battle/timer';
+import { useRouter } from 'next/navigation';
 
 export default function TournamentDetailPage({ params }: { params: { id: string } }) {
   const [tournament, setTournament] = useState<DetailTournamentResType['tournament'] | null>(null);
   const time = calculateTimeInSeconds(formatDateTime(tournament?.start_combat_time), formatDateTime(tournament?.end_combat_time))
+  const [activeTab, setActiveTab] = useState("problems");
+  const router = useRouter();
+
 
   useEffect(() => {
+    router.push(`#problems`)
+    
     const fetchRequest = async () => {
       try {
         const tournamentRes = await tournamentApiRequest.getDetailTournament(params.id);  
@@ -26,7 +32,13 @@ export default function TournamentDetailPage({ params }: { params: { id: string 
       }
     };
     fetchRequest();
-  }, [params.id]);
+  }, [params.id, router]);
+
+  const handleTabChange = (value: string) => {
+    setActiveTab(value)
+    // Update URL with hash
+    router.push(`#${value}`)
+  }
 
   if (tournament?.start_submission_time !== undefined && tournament?.end_submission_time !== undefined) {
     localStorage.setItem('startTournament', formatDateTime(tournament?.start_combat_time))
@@ -65,7 +77,7 @@ export default function TournamentDetailPage({ params }: { params: { id: string 
         </div>
       </div>
 
-      <Tabs defaultValue="problems">
+      <Tabs value={activeTab} onValueChange={handleTabChange}>
         <TabsList className="w-full flex justify-start h-12 rounded-none">
           <TabsTrigger value="problems" className="truncate justify-center min-w-[200px] h-[40px] rounded-none">
             Bài toán
@@ -80,16 +92,16 @@ export default function TournamentDetailPage({ params }: { params: { id: string 
             Vòng loại trực tiếp
           </TabsTrigger>
         </TabsList>
-        <TabsContent value="problems">
+        <TabsContent value="problems" id="problems">
           <Problems id={params.id} />
         </TabsContent>
-        <TabsContent value="participants">
+        <TabsContent value="participants" id="participants">
           <Participants id={params.id} />
         </TabsContent>
-        <TabsContent value="group">
+        <TabsContent value="group" id="group">
           <Groups id={params.id} />
         </TabsContent>
-        <TabsContent value="bracket">
+        <TabsContent value="bracket" id="bracket">
           <TournamentBracket id={params.id} />
         </TabsContent>
       </Tabs>
