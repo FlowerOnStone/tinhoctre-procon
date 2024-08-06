@@ -29,6 +29,7 @@ def detect_danger_cpp(source):
         "pclose",
         "_popen",
         "_pclose",
+        "fork",
     ]
     ALLOW_CHARS = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_"
 
