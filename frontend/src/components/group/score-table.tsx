@@ -20,30 +20,28 @@ export function ScoreTable({ data }: ScoreTableProps) {
         <TableBody>
           {data.rounds.map((match, index) => (
             <Link key={index} href={`/round/${match.id}/`} passHref>
-              <div>
-                <TableRow
-                  key={match.id}
-                  className="cursor-pointer hover:bg-[#14518B] transition duration-300 text-black hover:text-white flex"
+              <TableRow
+                key={match.id}
+                className="cursor-pointer hover:bg-[#14518B] transition duration-300 text-black hover:text-white flex"
+              >
+                <TableCell
+                  className={`${match.status === 'F' ? 'hover:text-white' : 'text-gray-400 hover:text-white'} ${
+                    match.status === 'F' ? 'hover:font-bold' : ''
+                  } flex-1`}
                 >
-                  <TableCell
-                    className={`${match.status === 'F' ? 'hover:text-white' : 'text-gray-400 hover:text-white'} ${
-                      match.status === 'F' ? 'hover:font-bold' : ''
-                    } flex-1`}
-                  >
-                    {match.first_user}
-                  </TableCell>
-                  <TableCell className="text-center hover:text-white flex-1">
-                    {match.status === 'N' ? 'Chưa thi đấu' : `${match.first_score} - ${match.second_score}`}
-                  </TableCell>
-                  <TableCell
-                    className={`text-right ${
-                      match.status === 'S' ? 'hover:text-white' : 'text-gray-400 hover:text-white'
-                    } ${match.status === 'S' ? 'hover:font-bold' : ''} flex-1`}
-                  >
-                    {match.second_user}
-                  </TableCell>
-                </TableRow>
-              </div>
+                  {match.first_user}
+                </TableCell>
+                <TableCell className="text-center hover:text-white flex-1">
+                  {match.status === 'N' ? 'Chưa thi đấu' : `${match.first_score} - ${match.second_score}`}
+                </TableCell>
+                <TableCell
+                  className={`text-right ${
+                    match.status === 'S' ? 'hover:text-white' : 'text-gray-400 hover:text-white'
+                  } ${match.status === 'S' ? 'hover:font-bold' : ''} flex-1`}
+                >
+                  {match.second_user}
+                </TableCell>
+              </TableRow>
             </Link>
           ))}
         </TableBody>
