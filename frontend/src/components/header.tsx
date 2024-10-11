@@ -13,18 +13,23 @@ import {
   DropdownMenuTrigger,
 } from './ui/dropdown-menu';
 import { Button } from './ui/button';
-import { LogOut, User } from 'lucide-react';
+import { LogOut as LogOutIcon, User } from 'lucide-react';
 import { Logout } from '@/components/logout';
-import Logo from './logo/logo';
+import Image from 'next/image';
+import {
+  NavigationMenu,
+  NavigationMenuItem,
+  NavigationMenuLink,
+  NavigationMenuList,
+  navigationMenuTriggerStyle,
+} from '@/components/ui/navigation-menu';
 
 const userRoutes = [
-  { name: 'Logo', href: '/' },
   { name: 'Cuộc thi', href: '/tournaments' },
   { name: 'Vòng đấu', href: '/round' },
 ];
 
 const adminRoutes = [
-  { name: 'Logo', href: '/' },
   { name: 'Cuộc thi', href: '/tournaments' },
   { name: 'Vòng đấu', href: '/round' },
   { name: 'Bài toán', href: '/problems' },
@@ -39,29 +44,29 @@ export default function Header() {
   return (
     <header className="fixed top-0 w-full flex justify-center bg-[#15518B] z-30 transition-all text-white">
       <div className="flex h-16 max-w-screen-2xl items-center justify-between w-full mx-[50px]">
-        <div className="flex gap-5 items-center justify-between">
-        {routes.map((route) => {
-          if (route.name === 'Logo') {
-            return (
-              <Link
-                key={route.href}
-                href={route.href}
-                className="hover:bg-white p-2 transition duration-300"
-              >
-                <Logo />
-              </Link>
-            );
-          }
-          return (
-            <Link
-              key={route.href}
-              href={route.href}
-              className="font-display text-xl hover:font-semibold transition duration-300"
-            >
-              {route.name}
-            </Link>
-          );
-        })}
+        <div className="flex gap-5 items-center justify-between h-full">
+          <Link href="/">
+            <Image src="/assets/logo.png" className="object-cover" height={36} width={108} alt="IMG1" />
+          </Link>
+          <NavigationMenu>
+            <NavigationMenuList>
+              {routes.map((route) => (
+                <NavigationMenuItem key={route.name}>
+                  <Link key={route.href} href={route.href} legacyBehavior passHref>
+                    <NavigationMenuLink
+                      className={
+                        navigationMenuTriggerStyle() +
+                        'py-0 rounded-none text-lg bg-[transparent] hover:bg-white/45 hover:text-white'
+                      }
+                    >
+                      {route.name}
+                    </NavigationMenuLink>
+                  </Link>
+                </NavigationMenuItem>
+              ))}
+            </NavigationMenuList>
+          </NavigationMenu>
+
           {user?.is_admin && <AdminDropdown />}
         </div>
         {user ? (
@@ -77,12 +82,12 @@ export default function Header() {
               <DropdownMenuGroup>
                 <DropdownMenuItem>
                   <User className="mr-2 h-4 w-4" />
-                  <Link href={'/profile'} className="text-base hover:font-semibold transition duration-300">
+                  <Link href={'/profile'} className="w-full text-base hover:font-semibold transition duration-300">
                     Thông tin cá nhân
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem>
-                  <LogOut className="mr-2 h-4 w-4" />
+                  <LogOutIcon className="mr-2 h-4 w-4" />
                   <Logout />
                 </DropdownMenuItem>
               </DropdownMenuGroup>
@@ -90,12 +95,34 @@ export default function Header() {
           </DropdownMenu>
         ) : (
           <div className="flex gap-5">
-            <Link href="/login" className="font-display text-xl hover:font-semibold transition duration-300">
-              Đăng nhập
-            </Link>
-            <Link href="/register" className="font-display text-xl hover:font-semibold transition duration-300">
-              Đăng ký
-            </Link>
+            <NavigationMenu>
+              <NavigationMenuList>
+                <NavigationMenuItem>
+                  <Link href="/login" legacyBehavior passHref>
+                    <NavigationMenuLink
+                      className={
+                        navigationMenuTriggerStyle() +
+                        'py-0 rounded-none text-lg bg-[transparent] hover:bg-white/45 hover:text-white'
+                      }
+                    >
+                      Đăng nhập
+                    </NavigationMenuLink>
+                  </Link>
+                </NavigationMenuItem>
+                <NavigationMenuItem>
+                  <Link href="/register" legacyBehavior passHref>
+                    <NavigationMenuLink
+                      className={
+                        navigationMenuTriggerStyle() +
+                        'py-0 rounded-none text-lg bg-[transparent] hover:bg-white/45 hover:text-white '
+                      }
+                    >
+                      Đăng ký
+                    </NavigationMenuLink>
+                  </Link>
+                </NavigationMenuItem>
+              </NavigationMenuList>
+            </NavigationMenu>
           </div>
         )}
       </div>
@@ -106,8 +133,15 @@ export default function Header() {
 function AdminDropdown() {
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger style={{ display: 'flex', alignItems: 'center' }} asChild>
-        <p className="text-xl hover:font-semibold transition duration-300 cursor-pointer">Quản lý</p>
+      <DropdownMenuTrigger className="flex items-center" asChild>
+        <p
+          className={
+            navigationMenuTriggerStyle() +
+            'hover:font-semibold transition duration-300 cursor-pointer py-0 rounded-none text-lg bg-[transparent] hover:bg-white/45 hover:text-white'
+          }
+        >
+          Quản lý
+        </p>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-56">
         <DropdownMenuGroup>

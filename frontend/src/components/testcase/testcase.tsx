@@ -11,17 +11,14 @@ import {
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { ColumnDef } from '@tanstack/react-table';
-import { ArrowUpDown } from 'lucide-react';
 import { DotsHorizontalIcon } from '@radix-ui/react-icons';
 
 import {
   Dialog,
   DialogContent,
   DialogDescription,
-  DialogHeader,
   DialogTitle,
   DialogTrigger,
-  DialogClose,
   DialogFooter,
 } from '@/components/ui/dialog';
 
@@ -32,11 +29,9 @@ import {
   AlertDialogContent,
   AlertDialogDescription,
   AlertDialogFooter,
-  AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
-import TestCaseForm from './testcaseform';
 import TestCaseEditor from './testcaseeditor';
 
 export type TestCase = {
