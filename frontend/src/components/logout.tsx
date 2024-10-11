@@ -37,21 +37,7 @@ export function Logout() {
 
   return (
     <>
-      <p
-        onMouseLeave={(e) => {
-          (e.currentTarget as HTMLParagraphElement).style.fontWeight = 'unset';
-          (e.currentTarget as HTMLParagraphElement).style.transition = 'unset';
-          (e.currentTarget as HTMLParagraphElement).style.fontSize = 'unset';
-          (e.currentTarget as HTMLParagraphElement).style.cursor = 'unset';
-        }}
-        onMouseEnter={(e) => {
-          (e.currentTarget as HTMLParagraphElement).style.fontWeight = '600';
-          (e.currentTarget as HTMLParagraphElement).style.transition = 'color 0.3s, font-weight 0.3s';
-          (e.currentTarget as HTMLParagraphElement).style.fontSize = '14px';
-          (e.currentTarget as HTMLParagraphElement).style.cursor = 'pointer';
-        }}
-        onClick={handleLinkClick}
-      >
+      <p onClick={handleLinkClick} className="w-full text-base hover:font-semibold transition duration-300">
         Đăng xuất
       </p>
 
